@@ -2,7 +2,7 @@ import gestion_productos
 from functools import reduce
 
 def main():
-    
+
     productos = []
     seguir = 1
 
@@ -11,11 +11,11 @@ def main():
         print("\n===== MENÚ DE PRODUCTOS =====")
         print("1. Agregar producto")
         print("2. Mostrar productos")
-        print("3. Ordenar productos por nombre (lambda + sort)")
-        print("4. Ordenar productos por stock (lambda + sorted)")
-        print("5. Ver productos con stock bajo (lambda + filter)")
-        print("6. Ver solo los nombres de productos (lambda + map)")
-        print("7. Ver stock total (lambda + reduce)")
+        print("3. Ordenar productos por nombre ")
+        print("4. Ordenar productos por stock ")
+        print("5. Ver productos con stock bajo")
+        print("6. Ver solo los nombres de productos ")
+        print("7. Ver stock total ")
         print("0. Salir")
 
         opcion = int(input("Ingrese una opción: "))

@@ -1,7 +1,7 @@
 from functools import reduce
 
 def agregar_producto(productos):
-    
+
     print("\n=== AGREGAR PRODUCTO ===")
 
     id_prod = int(input("Ingrese ID del producto: "))
@@ -79,7 +79,7 @@ def modificar_producto(productos, id_prod, nuevo_nombre=None, nueva_categoria=No
     print("Producto modificado correctamente.")
     return 1
 
-
+#falta agregar la funcion de eliminar al main
 def eliminar_producto(productos, id_prod):
 
     for i in range(len(productos)):
@@ -93,7 +93,7 @@ def eliminar_producto(productos, id_prod):
     print("Producto no encontrado.")
     return 0
 
-
+#ingresar cosas que ya estaban en la lista falta agregarlo al main
 def ingreso_stock(productos, id_prod, cantidad):
 
     prod = buscar_producto(productos, id_prod)
@@ -110,7 +110,7 @@ def ingreso_stock(productos, id_prod, cantidad):
     print("Ingreso registrado. Nuevo stock:", prod[4])
     return 1
 
-
+#falta hacer que se puedan vender cosas
 def egreso_stock(productos, id_prod, cantidad):
 
     prod = buscar_producto(productos, id_prod)
@@ -130,17 +130,3 @@ def egreso_stock(productos, id_prod, cantidad):
     prod[4] -= cantidad
     print("Egreso registrado. Nuevo stock:", prod[4])
     return 1
-
-
-def consultar_stock(productos, id_prod):
-
-    prod = buscar_producto(productos, id_prod)
-
-    if prod is None:
-
-        print("Producto no encontrado.")
-
-        return None
-
-    print("Stock actual:", prod[4])
-    return prod[4]
