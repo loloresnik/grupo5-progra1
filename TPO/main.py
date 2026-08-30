@@ -2,7 +2,8 @@ import gestion_productos
 from functools import reduce
 
 def main():
-
+    
+    productos = []
     seguir = 1
 
     while seguir == 1:
@@ -18,48 +19,83 @@ def main():
         print("0. Salir")
 
         opcion = int(input("Ingrese una opción: "))
-
+        
         if opcion == 1:
-            gestion_productos.agregar_producto()
 
-        
+            gestion_productos.agregar_producto(productos)
+
         elif opcion == 2:
-            gestion_productos.mostrar_productos()
 
-        
+            gestion_productos.mostrar_productos(productos)
+
         elif opcion == 3:
-            gestion_productos.productos.sort(key=lambda p: p[1])
+
+            productos.sort(key=lambda p: p[1])
             print("Productos ordenados por nombre:")
-            gestion_productos.mostrar_productos()
 
-        # 4. Ordenar por stock
+            print("#" * 80)
+            print("ID             Nombre          Categoria       Proveedor       Stock")
+            print("#" * 80)
+            
+            for fila in productos:
+                print(f"{fila[0]:<15} {fila[1]:<15} {fila[2]:<15} {fila[3]:<15} {fila[4]:>5}")
+            
+            print("#" * 80)
+
         elif opcion == 4:
-            ordenados = sorted(gestion_productos.productos, key=lambda p: p[4])
+
+            ordenados = sorted(productos, key=lambda p: p[4])
             print("Productos ordenados por stock:")
-            for p in ordenados:
-                print(p)
 
-        # 5. Filtrar stock bajo
+            print("#" * 80)
+            print("ID             Nombre          Categoria       Proveedor       Stock")
+            print("#" * 80)
+
+            for fila in ordenados:
+                print(f"{fila[0]:<15} {fila[1]:<15} {fila[2]:<15} {fila[3]:<15} {fila[4]:>5}")
+
+            print("#" * 80)
+
         elif opcion == 5:
+
             limite = int(input("Ingrese límite de stock: "))
-            bajos = list(filter(lambda p: p[4] < limite, gestion_productos.productos))
+            bajos = list(filter(lambda p: p[4] < limite, productos))
+
             print("Productos con stock menor al límite:")
-            for p in bajos:
-                print(p)
 
-        # 6. Obtener nombres
+            print("#" * 80)
+            print("ID             Nombre          Categoria       Proveedor       Stock")
+            print("#" * 80)
+
+            for fila in bajos:
+                print(f"{fila[0]:<15} {fila[1]:<15} {fila[2]:<15} {fila[3]:<15} {fila[4]:>5}")
+
+            print("#" * 80)
+
         elif opcion == 6:
-            nombres = list(map(lambda p: p[1], gestion_productos.productos))
+
+            nombres = list(map(lambda p: p[1], productos))
+
             print("Nombres de productos:")
-            print(nombres)
+            print("#" * 40)
+            print("Nombre")
+            print("#" * 40)
 
-        # 7. Stock total
+            for nombre in nombres:
+                print(f"{nombre:<30}")
+
+            print("#" * 40)
+
         elif opcion == 7:
-            total = reduce(lambda acum, p: acum + p[4], gestion_productos.productos, 0)
-            print("Stock total en inventario:", total)
 
-        # 0. Salir
+            total = reduce(lambda acum, p: acum + p[4], productos , 0)
+
+            print("#" * 40)
+            print(f"{'Stock total en inventario:':<30} {total:>5}")
+            print("#" * 40)
+
         elif opcion == 0:
+
             print("Saliendo del sistema...")
             seguir = 0
 
