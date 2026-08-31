@@ -80,25 +80,3 @@ def menu_usuario():
             print("Opción inválida")
 
 
-def main():
-    opcion = 0
-
-    while opcion != 2:
-        mostrar_menu_inicio()
-        opcion = int(input("Ingrese una opción: "))
-
-        if opcion == 1:
-            tipo_usuario = iniciar_sesion()
-
-            if tipo_usuario == "admin":
-                menu_admin()
-            elif tipo_usuario == "usuario":
-                menu_usuario()
-
-        elif opcion == 2:
-            print("Saliendo del sistema...")
-        else:
-            print("Opción inválida")
-
-
-main()
