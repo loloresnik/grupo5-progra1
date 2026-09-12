@@ -1,10 +1,12 @@
+import re
+
 def agregar_proveedor(proveedores, proveedor):
     #Agrega un nuevo proveedor a la matriz
     proveedores.append(proveedor)
     return proveedores
 
 def buscar_proveedor(proveedores, nombre):
-    #Busca un proveedor en la matriz por su nombre (insensible a mayúsculas/minúsculas).
+    #Busca un proveedor en la matriz por su nombre
     #Retorna una lista de filas con las coincidencias con el nombre
     resultado = []
     for fila in proveedores:
@@ -22,7 +24,7 @@ def modificar_proveedor(proveedores, nombre, nuevo_nombre, nuevo_telefono, nuevo
     return proveedores
 
 def eliminar_proveedor(proveedores, nombre):
-    #Elimina un proveedor de la matriz introduciendo su nombre
+    #Elimina un proveedor de la matriz introduciendo su npmbre
     nuevos_proveedores = []
     for fila in proveedores:
         if fila[1].lower() != nombre.lower():
@@ -35,17 +37,9 @@ def mostrar_proveedores(proveedores):
     return proveedores
 
 def buscar_productos_por_proveedor(inventario, proveedor):
-    #Busca y retorna los productos de la matriz de inventario que pertenecen a un proveedor    
-    resultado = []
-    for fila in inventario:
-        if fila.lower() == proveedor.lower():
-            resultado.append(fila)
-    return resultado
+#Filtra productos usando la función filter combinada con una funcion lambda y re.search
+    return list(filter(lambda fila: re.search(proveedor, fila, re.IGNORECASE), inventario))
 
 def stock_por_proveedor(inventario, proveedor):
-    #Calcula y retorna la suma total de stock (cantidad) de un proveedor en la matriz
-    total_stock = 0
-    for fila in inventario:
-        if fila.lower() == proveedor.lower():
-            total_stock += fila[2]
-    return total_stock
+#Suma el stock acumulado utilizando la función integrada sum y una expresión generadora
+    return sum(fila for fila in inventario if re.search(proveedor, fila, re.IGNORECASE))
