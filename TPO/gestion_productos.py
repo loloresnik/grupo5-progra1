@@ -1,277 +1,303 @@
 import re
 from functools import reduce
 
-# AGREGAR PRODUCTO
-# Pide los datos del producto, los valida y los agrega a la lista.
-def agregar_producto(productos):
+# Agregar producto
+def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedores_unicos):
+    """Registra un nuevo producto en la lista de diccionarios.
+    Valida cada campo ingresado por el usuario y evita que se repitan IDs utilizando un conjunto."""
 
     print("\n=== AGREGAR PRODUCTO ===")
 
-    # ID (solo números)
-    id_prod = input("Ingrese ID del producto: ")
+    # ID
+    id_prod = input("Ingrese ID del producto: ").strip()
 
-    while re.match(r"^\d+$", id_prod) is None:
+    while not id_prod.isdigit():
 
         print("El ID debe ser numerico.")
 
-        id_prod = input("Ingrese ID del producto: ")
+        id_prod = input("Ingrese ID del producto: ").strip()
 
     id_prod = int(id_prod)
 
-    # Nombre (solo letras y espacios)
-    nombre = input("Ingrese el nombre del producto: ")
+    # Evito IDs repetidos
+    if id_prod in ids_unicos:
+
+        print("El ID ya existe.")
+
+        return 0
+
+    # Nombre
+    nombre = input("Ingrese el nombre del producto: ").strip()
 
     while re.match(r"^[A-Za-z ]+$", nombre) is None:
 
         print("El nombre solo puede contener letras.")
 
-        nombre = input("Ingrese el nombre del producto: ")
+        nombre = input("Ingrese el nombre del producto: ").strip()
 
     # Categoria
-    id_categoria = input("Ingrese la categoria: ")
+    categoria = input("Ingrese la categoria: ").strip()
 
-    while re.match(r"^[A-Za-z ]+$", id_categoria) is None:
+    while re.match(r"^[A-Za-z ]+$", categoria) is None:
 
         print("La categoria solo puede contener letras.")
 
-        id_categoria = input("Ingrese la categoria: ")
-
-
+        categoria = input("Ingrese la categoria: ").strip()
 
     # Proveedor
-    proveedor = input("Ingrese el proveedor: ")
+    proveedor = input("Ingrese el proveedor: ").strip()
 
     while re.match(r"^[A-Za-z ]+$", proveedor) is None:
 
         print("El proveedor solo puede contener letras.")
 
-        proveedor = input("Ingrese el proveedor: ")
+        proveedor = input("Ingrese el proveedor: ").strip()
 
-    # Stock (solo números)
-    stock = input("Ingrese el stock inicial: ")
+    # Stock
+    stock = input("Ingrese el stock inicial: ").strip()
 
-    while re.match(r"^\d+$", stock) is None:
+    while not stock.isdigit():
 
-        print("El stock debe ser un numero entero.")
-        stock = input("Ingrese el stock inicial: ")
+        print("El stock debe ser numerico.")
 
-    stock = int(stock)
+        stock = input("Ingrese el stock inicial: ").strip()
 
-    nuevo = [id_prod, nombre, id_categoria, proveedor, stock]
+    nuevo = {
+        "id": id_prod,
+        "nombre": nombre,
+        "categoria": categoria,
+        "proveedor": proveedor,
+        "stock": int(stock)
+    }
 
-    productos.append(nuevo)
+    productos_dic.append(nuevo)
+
+    # Actualizo conjuntos
+    ids_unicos.add(id_prod)
+    categorias_unicas.add(categoria)
+    proveedores_unicos.add(proveedor)
 
     print("Producto agregado correctamente.\n")
-
     return 1
 
-# BUSCAR PRODUCTO
-# Busca un producto por ID.
-def buscar_producto(productos, id_prod):
 
-    for producto in productos:
+# Buscar producto 
+def buscar_producto_dic(productos_dic, id_prod):
+    """Recorre la lista y devuelve el diccionario del producto si encuentra coincidencia.
+    Si no existe, devuelve None."""
 
-        if producto[0] == id_prod:
+    for p in productos_dic:
 
-            return producto
+        if p["id"] == id_prod:
+
+            return p
 
     return None
 
-# MODIFICAR PRODUCTO
-# Cambia nombre, categoria o proveedor del producto.
-def modificar_producto(productos, id_prod, nuevo_nombre=None, nueva_categoria=None, nuevo_proveedor=None):
 
-    producto = buscar_producto(productos, id_prod)
+# Mostrar productos 
+def mostrar_productos_dic(productos_dic):
+    """Muestra todos los productos almacenados en formato de tabla."""
+
+    if len(productos_dic) == 0:
+
+        print("No hay productos cargados.")
+
+        return
+
+    print("\n--- LISTA DE PRODUCTOS (Diccionario) ---")
+    print("-" * 80)
+    print("ID             Nombre          Categoria       Proveedor       Stock")
+    print("-" * 80)
+
+    for p in productos_dic:
+
+        print(f"{p['id']:<15} {p['nombre']:<15} {p['categoria']:<15} {p['proveedor']:<15} {p['stock']:>5}")
+
+    print("-" * 80)
+
+
+# Modificar producto 
+def modificar_producto_dic(productos_dic, id_prod, nuevo_nombre, nueva_categoria, nuevo_proveedor, categorias_unicas, proveedores_unicos):
+    #Modifica los datos de un producto existente.
+    producto = buscar_producto_dic(productos_dic, id_prod)
 
     if producto is None:
-        print("Producto no encontrado.")
-        return 0
 
+        print("Producto no encontrado.")
+
+        return 0
 
     if nuevo_nombre is not None:
 
-        producto[1] = nuevo_nombre
+        producto["nombre"] = nuevo_nombre
 
     if nueva_categoria is not None:
 
-        producto[2] = nueva_categoria
+        producto["categoria"] = nueva_categoria
+
+        categorias_unicas.add(nueva_categoria)
 
     if nuevo_proveedor is not None:
 
-        producto[3] = nuevo_proveedor
+        producto["proveedor"] = nuevo_proveedor
 
+        proveedores_unicos.add(nuevo_proveedor)
 
     print("Producto modificado correctamente.")
+
     return 1
 
-# ELIMINAR PRODUCTO
-def eliminar_producto(productos, id_prod):
 
-    for i in range(len(productos)):
+# Eliminar producto
+def eliminar_producto_dic(productos_dic, id_prod, ids_unicos):
 
-        if productos[i][0] == id_prod:
-
-            productos.pop(i)
+    for i in range(len(productos_dic)):
+        if productos_dic[i]["id"] == id_prod:
+            productos_dic.pop(i)
+            ids_unicos.remove(id_prod)
             print("Producto eliminado.")
             return 1
 
     print("Producto no encontrado.")
     return 0
 
-# MOSTRAR PRODUCTOS
-def mostrar_productos(productos):
+# Registrar movimiento (ingreso o egreso)
+def agregar_movimiento(movimientos, tipo, id_prod, cantidad, productos_dic):
 
-    if len(productos) == 0:
-        print("No hay productos cargados.")
+    print("\n=== Registrar movimiento ===")
+
+    # Validar que el ID exista 
+    producto = buscar_producto_dic(productos_dic, id_prod)
+
+    if producto is None:
+
+        print("El ID ingresado no existe en el inventario.")
+
+        return 0
+
+    # Fecha como tupla ingresada por el usuario
+    dia = input("Dia: ").strip()
+    mes = input("Mes: ").strip()
+    anio = input("Año: ").strip()
+
+    # Validar que sean números
+    if not (dia.isdigit() and mes.isdigit() and anio.isdigit()):
+
+        print("Fecha invalida (debe contener solo numeros).")
+
+        return 0
+
+    dia = int(dia)
+    mes = int(mes)
+    anio = int(anio)
+
+    # hay alguna libreria que tenga la fecha asi no tengo que hacer esta validacion? 
+    # Validar rangos
+    if dia < 1 or dia > 31:
+
+        print("Dia invalido (debe estar entre 1 y 31).")
+
+        return 0
+
+    if mes < 1 or mes > 12:
+
+        print("Mes invalido (debe estar entre 1 y 12).")
+
+        return 0
+
+    if anio <= 0:
+        print("Año invalido.")
+        return 0
+
+    fecha = (dia, mes, anio)
+
+    nuevo = [tipo, id_prod, cantidad, fecha]
+
+    movimientos.append(nuevo)
+
+    print("Movimiento registrado.\n")
+
+    return 1
+
+# Mostrar movimientos
+def mostrar_movimientos(movimientos):
+
+    if len(movimientos) == 0:
+        
+        print("No hay movimientos registrados.")
+        
         return
 
+    print("\n--- MOVIMIENTOS ---")
+    print("-" * 80)
+    print("Tipo           ID Producto     Cantidad        Fecha")
+    print("-" * 80)
 
-    print("\n--- LISTA DE PRODUCTOS ---")
-    print("#" * 80)
-    print("ID             Nombre          Categoria       Proveedor       Stock")
-    print("#" * 80)
+    for m in movimientos:
 
-    for p in productos:
-        
-        print(f"{p[0]:<15} {p[1]:<15} {p[2]:<15} {p[3]:<15} {p[4]:>5}")
+        fecha = f"{m[3][0]}/{m[3][1]}/{m[3][2]}"
 
-    print("#" * 80)
+        print(f"{m[0]:<15} {m[1]:<15} {m[2]:<15} {fecha:<15}")
 
-# INGRESO DE STOCK
-def ingreso_stock(productos, id_prod, cantidad):
+    print("-" * 80)
 
-    producto = buscar_producto(productos, id_prod)
+
+# Filtrar movimientos por tipo
+def filtrar_movimientos(movimientos, tipo):
+
+    filtrados = list(filter(lambda m: m[0] == tipo, movimientos))
+
+    mostrar_movimientos(filtrados)
+
+
+def ingreso_stock_dic(productos_dic, id_prod, cantidad):
+
+    producto = buscar_producto_dic(productos_dic, id_prod)
 
     if producto is None:
-        print("Producto no encontrado.")
-        return 0
 
+        print("Producto no encontrado.")
+
+        return 0
 
     if cantidad <= 0:
+
         print("Cantidad invalida.")
+
         return 0
 
+    producto["stock"] += cantidad
 
-    producto[4] += cantidad
-
-    print("Ingreso registrado. Nuevo stock:", producto[4])
+    print("Ingreso registrado. Nuevo stock:", producto["stock"])
 
     return 1
 
-# EGRESO DE STOCK
-def egreso_stock(productos, id_prod, cantidad):
 
-    producto = buscar_producto(productos, id_prod)
+def egreso_stock_dic(productos_dic, id_prod, cantidad):
+
+    producto = buscar_producto_dic(productos_dic, id_prod)
 
     if producto is None:
-        print("Producto no encontrado.")
-        return 0
 
+        print("Producto no encontrado.")
+
+        return 0
 
     if cantidad <= 0:
+
         print("Cantidad invalida.")
+
         return 0
 
+    if producto["stock"] < cantidad:
 
-    if producto[4] < cantidad:
         print("Stock insuficiente.")
+
         return 0
 
+    producto["stock"] -= cantidad
 
-    producto[4] -= cantidad
-
-    print("Egreso registrado. Nuevo stock:", producto[4])
+    print("Egreso registrado. Nuevo stock:", producto["stock"])
 
     return 1
-
-# CONSULTAR STOCK
-def consultar_stock(productos, id_prod):
-
-    producto = buscar_producto(productos, id_prod)
-
-    if producto is None:
-        print("Producto no encontrado.")
-        return None
-
-
-    print("Stock actual:", producto[4])
-
-    return producto[4]
-
-# ORDENAR POR NOMBRE
-def ordenar_por_nombre(productos):
-
-    productos.sort(key=lambda p: p[1])
-
-
-    print("Productos ordenados por nombre:")
-    print("#" * 80)
-    print("ID             Nombre          Categoria       Proveedor       Stock")
-    print("#" * 80)
-
-    for fila in productos:
-
-        print(f"{fila[0]:<15} {fila[1]:<15} {fila[2]:<15} {fila[3]:<15} {fila[4]:>5}")
-
-    print("#" * 80)
-
-
-# ORDENAR POR STOCK
-def ordenar_por_stock(productos):
-
-    ordenados = sorted(productos, key=lambda p: p[4])
-
-
-    print("Productos ordenados por stock:")
-    print("#" * 80)
-    print("ID             Nombre          Categoria       Proveedor       Stock")
-    print("#" * 80)
-
-    for fila in ordenados:
-
-        print(f"{fila[0]:<15} {fila[1]:<15} {fila[2]:<15} {fila[3]:<15} {fila[4]:>5}")
-
-    print("#" * 80)
-
-# FILTRAR STOCK BAJO
-def filtrar_stock_bajo(productos, limite):
-
-    bajos = list(filter(lambda p: p[4] < limite, productos))
-
-
-    print("Productos con stock menor al limite:")
-    print("#" * 80)
-    print("ID             Nombre          Categoria       Proveedor       Stock")
-    print("#" * 80)
-
-    for fila in bajos:
-
-        print(f"{fila[0]:<15} {fila[1]:<15} {fila[2]:<15} {fila[3]:<15} {fila[4]:>5}")
-
-    print("#" * 80)
-
-# MOSTRAR NOMBRES
-def mostrar_nombres(productos):
-
-    nombres = list(map(lambda p: p[1], productos))
-
-
-    print("Nombres de productos:")
-    print("#" * 40)
-    print("Nombre")
-    print("#" * 40)
-
-    for nombre in nombres:
-        print(f"{nombre:<30}")
-
-    print("#" * 40)
-
-# STOCK TOTAL
-def stock_total(productos):
-
-    total = reduce(lambda acum, p: acum + p[4], productos, 0)
-
-
-    print("#" * 40)
-    print(f"{'Stock total en inventario:':<30} {total:>5}")
-    print("#" * 40)

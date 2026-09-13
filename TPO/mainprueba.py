@@ -1,187 +1,189 @@
 from gestion_productos import (
-    agregar_producto,
-    buscar_producto,
-    modificar_producto,
-    eliminar_producto,
-    mostrar_productos,
-    ingreso_stock,
-    egreso_stock,
-    consultar_stock,
-    ordenar_por_nombre,
-    ordenar_por_stock,
-    filtrar_stock_bajo,
-    mostrar_nombres,
-    stock_total,
+    agregar_producto_dic,
+    mostrar_productos_dic,
+    modificar_producto_dic,
+    eliminar_producto_dic,
+    ingreso_stock_dic,
+    egreso_stock_dic,
+    agregar_movimiento,
+    mostrar_movimientos,
+    filtrar_movimientos
 )
 
 def main():
 
-    productos = []
+    # Lista de productos 
+    productos_dic = []
+
+    # Movimientos 
+    movimientos = []
+
+    #para evitar duplicados
+    ids_unicos = set()
+    categorias_unicas = set()
+    proveedores_unicos = set()
 
     opcion = ""
 
     while opcion != "0":
 
         print("\n=== MENU PRINCIPAL ===")
-        print("1 - Agregar producto")
-        print("2 - Buscar producto")
-        print("3 - Modificar producto")
-        print("4 - Eliminar producto")
-        print("5 - Mostrar productos")
-        print("6 - Ingreso de stock")
-        print("7 - Egreso de stock")
-        print("8 - Consultar stock")
-        print("9 - Ordenar por nombre")
-        print("10 - Ordenar por stock")
-        print("11 - Filtrar stock bajo")
-        print("12 - Mostrar nombres")
-        print("13 - Stock total")
+        print("1 - Gestionar productos ")
+        print("2 - Gestionar movimientos")
+        print("3 - Ver conjuntos")
         print("0 - Salir")
 
-        opcion = input("Ingrese una opcion: ")
-
-        print()
+        opcion = input("Ingrese una opcion: ").strip()
 
         if opcion == "1":
 
-            agregar_producto(productos)
+            print("\n--- CRUD PRODUCTOS ---")
+            print("1 - Agregar producto")
+            print("2 - Mostrar productos")
+            print("3 - Modificar producto")
+            print("4 - Eliminar producto")
+            print("5 - Ingreso de stock")
+            print("6 - Egreso de stock")
+            print("0 - Volver")
+
+            sub = input("Ingrese opcion: ").strip()
+
+            if sub == "1":
+
+                agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedores_unicos)
+
+            elif sub == "2":
+
+                mostrar_productos_dic(productos_dic)
+
+            elif sub == "3":
+
+                id_prod = input("ID del producto: ").strip()
+
+                if id_prod.isdigit():
+                    id_prod = int(id_prod)
+
+                    nuevo_nombre = input("Nuevo nombre (ENTER para no cambiar): ").strip()
+                    nueva_categoria = input("Nueva categoria (ENTER para no cambiar): ").strip()
+                    nuevo_proveedor = input("Nuevo proveedor (ENTER para no cambiar): ").strip()
+
+                    if nuevo_nombre == "":
+                        nuevo_nombre = None
+                    if nueva_categoria == "":
+                        nueva_categoria = None
+                    if nuevo_proveedor == "":
+                        nuevo_proveedor = None
+
+                    modificar_producto_dic(
+                        productos_dic,
+                        id_prod,
+                        nuevo_nombre,
+                        nueva_categoria,
+                        nuevo_proveedor,
+                        categorias_unicas,
+                        proveedores_unicos
+                    )
+                else:
+
+                    print("ID invalido.")
+
+            elif sub == "4":
+
+                id_prod = input("ID del producto: ").strip()
+
+                if id_prod.isdigit():
+
+                    eliminar_producto_dic(productos_dic, int(id_prod), ids_unicos)
+                    
+                else:
+
+                    print("ID invalido.")
+
+            elif sub == "5":
+
+                id_prod = input("ID del producto: ").strip()
+
+                cantidad = input("Cantidad a ingresar: ").strip()
+
+                if id_prod.isdigit() and cantidad.isdigit():
+
+                    ingreso_stock_dic(productos_dic, int(id_prod), int(cantidad))
+
+                else:
+
+                    print("Datos invalidos.")
+
+            elif sub == "6":
+
+                id_prod = input("ID del producto: ").strip()
+
+                cantidad = input("Cantidad a retirar: ").strip()
+
+                if id_prod.isdigit() and cantidad.isdigit():
+
+                    egreso_stock_dic(productos_dic, int(id_prod), int(cantidad))
+
+                else:
+
+                    print("Datos invalidos.")
 
         elif opcion == "2":
 
-            id_prod = input("Ingrese ID a buscar: ")
+            print("\n--- CRUD MOVIMIENTOS ---")
+            print("1 - Registrar ingreso")
+            print("2 - Registrar egreso")
+            print("3 - Mostrar movimientos")
+            print("4 - Filtrar ingresos")
+            print("5 - Filtrar egresos")
+            print("0 - Volver")
 
-            if id_prod.isdigit():
+            sub = input("Ingrese opcion: ").strip()
 
-                id_prod = int(id_prod)
+            if sub == "1":
 
-                prod = buscar_producto(productos, id_prod)
+                id_prod = input("ID del producto: ").strip()
 
-                if prod is None:
-                    print("Producto no encontrado.")
+                cantidad = input("Cantidad: ").strip()
+
+                if id_prod.isdigit() and cantidad.isdigit():
+
+                    agregar_movimiento(movimientos, "ingreso", int(id_prod), int(cantidad), productos_dic)
                 else:
-                    print("Producto encontrado:", prod)
 
-            else:
-                print("ID invalido.")
+                    print("Datos invalidos.")
+
+            elif sub == "2":
+
+                id_prod = input("ID del producto: ").strip()
+
+                cantidad = input("Cantidad: ").strip()
+
+                if id_prod.isdigit() and cantidad.isdigit():
+
+                    agregar_movimiento(movimientos, "egreso", int(id_prod), int(cantidad), productos_dic)
+
+                else:
+
+                    print("Datos invalidos.")
+
+            elif sub == "3":
+
+                mostrar_movimientos(movimientos)
+
+            elif sub == "4":
+
+                filtrar_movimientos(movimientos, "ingreso")
+
+            elif sub == "5":
+
+                filtrar_movimientos(movimientos, "egreso")
 
         elif opcion == "3":
 
-            id_prod = input("Ingrese ID a modificar: ")
-
-            if id_prod.isdigit():
-
-                id_prod = int(id_prod)
-
-                nuevo_nombre = input("Nuevo nombre (ENTER para no cambiar): ")
-                nueva_categoria = input("Nueva categoria (ENTER para no cambiar): ")
-                nuevo_proveedor = input("Nuevo proveedor (ENTER para no cambiar): ")
-
-                if nuevo_nombre == "":
-                    nuevo_nombre = None
-
-                if nueva_categoria == "":
-                    nueva_categoria = None
-
-                if nuevo_proveedor == "":
-                    nuevo_proveedor = None
-
-                modificar_producto(productos, id_prod, nuevo_nombre, nueva_categoria, nuevo_proveedor)
-
-            else:
-                print("ID invalido.")
-
-        elif opcion == "4":
-
-            id_prod = input("Ingrese ID a eliminar: ")
-
-            if id_prod.isdigit():
-
-                id_prod = int(id_prod)
-
-                eliminar_producto(productos, id_prod)
-
-            else:
-                print("ID invalido.")
-
-        elif opcion == "5":
-
-            mostrar_productos(productos)
-
-        elif opcion == "6":
-
-            id_prod = input("ID del producto: ")
-            cantidad = input("Cantidad a ingresar: ")
-
-            if id_prod.isdigit() and cantidad.isdigit():
-
-                ingreso_stock(productos, int(id_prod), int(cantidad))
-
-            else:
-                print("Datos invalidos.")
-
-
-
-        elif opcion == "7":
-
-            id_prod = input("ID del producto: ")
-            cantidad = input("Cantidad a retirar: ")
-
-            if id_prod.isdigit() and cantidad.isdigit():
-
-                egreso_stock(productos, int(id_prod), int(cantidad))
-
-            else:
-                print("Datos invalidos.")
-
-
-
-        elif opcion == "8":
-
-            id_prod = input("ID del producto: ")
-
-            if id_prod.isdigit():
-
-                consultar_stock(productos, int(id_prod))
-
-            else:
-                print("ID invalido.")
-
-
-
-        elif opcion == "9":
-
-            ordenar_por_nombre(productos)
-
-
-
-        elif opcion == "10":
-
-            ordenar_por_stock(productos)
-
-
-
-        elif opcion == "11":
-
-            limite = input("Ingrese limite de stock: ")
-
-            if limite.isdigit():
-
-                filtrar_stock_bajo(productos, int(limite))
-
-            else:
-                print("Limite invalido.")
-
-
-
-        elif opcion == "12":
-
-            mostrar_nombres(productos)
-
-
-
-        elif opcion == "13":
-
-            stock_total(productos)
+            print("\n--- CONJUNTOS ---")
+            print("IDs únicos:", ids_unicos)
+            print("Categorías únicas:", categorias_unicas)
+            print("Proveedores únicos:", proveedores_unicos)
 
         elif opcion == "0":
 
