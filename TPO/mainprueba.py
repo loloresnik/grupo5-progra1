@@ -37,7 +37,7 @@ def main():
 
         if opcion == "1":
 
-            print("\n--- CRUD PRODUCTOS ---")
+            print("\n--- GESTION DE PRODUCTOS ---")
             print("1 - Agregar producto")
             print("2 - Mostrar productos")
             print("3 - Modificar producto")
@@ -129,7 +129,7 @@ def main():
 
         elif opcion == "2":
 
-            print("\n--- CRUD MOVIMIENTOS ---")
+            print("\n--- GESTION DE MOVIMIENTOS ---")
             print("1 - Registrar ingreso")
             print("2 - Registrar egreso")
             print("3 - Mostrar movimientos")
@@ -180,7 +180,7 @@ def main():
 
         elif opcion == "3":
 
-            print("\n--- CONJUNTOS ---")
+            print("\n--- PANELES DE CONJUNTOS ---")
             print("IDs únicos:", ids_unicos)
             print("Categorías únicas:", categorias_unicas)
             print("Proveedores únicos:", proveedores_unicos)

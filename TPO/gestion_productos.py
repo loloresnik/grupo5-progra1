@@ -105,7 +105,7 @@ def mostrar_productos_dic(productos_dic):
 
         return
 
-    print("\n--- LISTA DE PRODUCTOS (Diccionario) ---")
+    print("\n--- LISTA DE PRODUCTOS  ---")
     print("-" * 80)
     print("ID             Nombre          Categoria       Proveedor       Stock")
     print("-" * 80)
@@ -229,7 +229,7 @@ def mostrar_movimientos(movimientos):
         
         return
 
-    print("\n--- MOVIMIENTOS ---")
+    print("\n--- GESTION DE MOVIMIENTOS ---")
     print("-" * 80)
     print("Tipo           ID Producto     Cantidad        Fecha")
     print("-" * 80)
