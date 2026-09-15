@@ -10,15 +10,14 @@ def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedor
     # ID
     id_prod = input("Ingrese ID del producto: ").strip()
 
-    while not id_prod.isdigit():
+    while re.match(r"^\d+$", id_prod) is None:
 
-        print("El ID debe ser numerico.")
+        print("El ID debe ser numérico.")
 
         id_prod = input("Ingrese ID del producto: ").strip()
 
     id_prod = int(id_prod)
 
-    # Evito IDs repetidos
     if id_prod in ids_unicos:
 
         print("El ID ya existe.")
@@ -34,14 +33,14 @@ def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedor
 
         nombre = input("Ingrese el nombre del producto: ").strip()
 
-    # Categoria
-    categoria = input("Ingrese la categoria: ").strip()
+    # Categoría
+    categoria = input("Ingrese la categoría: ").strip()
 
     while re.match(r"^[A-Za-z ]+$", categoria) is None:
 
-        print("La categoria solo puede contener letras.")
+        print("La categoría solo puede contener letras.")
 
-        categoria = input("Ingrese la categoria: ").strip()
+        categoria = input("Ingrese la categoría: ").strip()
 
     # Proveedor
     proveedor = input("Ingrese el proveedor: ").strip()
@@ -55,18 +54,18 @@ def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedor
     # Stock
     stock = input("Ingrese el stock inicial: ").strip()
 
-    while not stock.isdigit():
+    while re.match(r"^\d+$", stock) is None:
 
-        print("El stock debe ser numerico.")
+        print("El stock debe ser numérico.")
 
         stock = input("Ingrese el stock inicial: ").strip()
 
-    # Precio 
+    # Precio
     precio = input("Ingrese el precio del producto: ").strip()
 
-    while not precio.isdigit():
+    while re.match(r"^\d+$", precio) is None:
 
-        print("El precio debe ser numerico.")
+        print("El precio debe ser numérico.")
 
         precio = input("Ingrese el precio del producto: ").strip()
 
@@ -81,7 +80,6 @@ def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedor
 
     productos_dic.append(nuevo)
 
-    # Actualizo conjuntos
     ids_unicos.add(id_prod)
     categorias_unicas.add(categoria)
     proveedores_unicos.add(proveedor)
@@ -101,7 +99,7 @@ def buscar_producto_dic(productos_dic, id_prod):
         if p["id"] == id_prod:
 
             return p
-        
+
     return None
 
 
@@ -146,11 +144,13 @@ def modificar_producto_dic(productos_dic, id_prod, nuevo_nombre, nueva_categoria
     if nueva_categoria is not None:
 
         producto["categoria"] = nueva_categoria
+
         categorias_unicas.add(nueva_categoria)   
 
     if nuevo_proveedor is not None:
 
         producto["proveedor"] = nuevo_proveedor
+
         proveedores_unicos.add(nuevo_proveedor)
 
     if nuevo_precio is not None:
@@ -158,6 +158,7 @@ def modificar_producto_dic(productos_dic, id_prod, nuevo_nombre, nueva_categoria
         producto["precio"] = nuevo_precio
 
     print("Producto modificado correctamente.")
+
     return 1
 
 
@@ -188,7 +189,6 @@ def agregar_movimiento(movimientos, tipo, id_prod, cantidad, productos_dic):
 
     print("\n=== Registrar movimiento ===")
 
-    # Validar que el ID exista 
     producto = buscar_producto_dic(productos_dic, id_prod)
 
     if producto is None:
@@ -197,45 +197,39 @@ def agregar_movimiento(movimientos, tipo, id_prod, cantidad, productos_dic):
 
         return 0
 
-    # Fecha como tupla ingresada por el usuario
+    # Fecha
     dia = input("Dia: ").strip()
     mes = input("Mes: ").strip()
     anio = input("Año: ").strip()
 
-    # Validar que sean números
-    if not (dia.isdigit() and mes.isdigit() and anio.isdigit()):
+    if re.match(r"^\d+$", dia) is None or re.match(r"^\d+$", mes) is None or re.match(r"^\d+$", anio) is None:
 
-        print("Fecha invalida (debe contener solo numeros).")
+        print("Fecha inválida (debe contener solo números).")
 
         return 0
 
-    dia = int(dia)
-    mes = int(mes)
-    anio = int(anio)
+    dia, mes, anio = int(dia), int(mes), int(anio)
 
-    # Validar rangos
     if dia < 1 or dia > 31:
 
-        print("Dia invalido (debe estar entre 1 y 31).")
+        print("Día inválido (debe estar entre 1 y 31).")
 
         return 0
 
     if mes < 1 or mes > 12:
 
-        print("Mes invalido (debe estar entre 1 y 12).")
+        print("Mes inválido (debe estar entre 1 y 12).")
 
         return 0
 
     if anio <= 0:
 
-        print("Año invalido.")
+        print("Año inválido.")
 
         return 0
 
     fecha = (dia, mes, anio)
-
     nuevo = [tipo, id_prod, cantidad, fecha]
-
     movimientos.append(nuevo)
 
     print("Movimiento registrado.\n")
@@ -269,6 +263,7 @@ def mostrar_movimientos(movimientos):
 
 # Filtrar movimientos por tipo
 def filtrar_movimientos(movimientos, tipo):
+
     """Filtra los movimientos por tipo (ingreso o egreso)."""
 
     filtrados = list(filter(lambda m: m[0] == tipo, movimientos))
@@ -290,7 +285,7 @@ def ingreso_stock_dic(productos_dic, id_prod, cantidad):
 
     if cantidad <= 0:
 
-        print("Cantidad invalida.")
+        print("Cantidad inválida.")
 
         return 0
 
@@ -315,7 +310,7 @@ def egreso_stock_dic(productos_dic, id_prod, cantidad):
 
     if cantidad <= 0:
 
-        print("Cantidad invalida.")
+        print("Cantidad inválida.")
 
         return 0
 
@@ -328,5 +323,5 @@ def egreso_stock_dic(productos_dic, id_prod, cantidad):
     producto["stock"] -= cantidad
 
     print("Egreso registrado. Nuevo stock:", producto["stock"])
-    
+
     return 1
