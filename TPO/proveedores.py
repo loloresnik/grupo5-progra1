@@ -1,13 +1,14 @@
 import re
 
 def agregar_proveedor(proveedores, proveedor):
-    #Agrega un nuevo proveedor a la matriz
+    """
+    proveedor = [id, nombre, telefono, mail]
+    """
     proveedores.append(proveedor)
     return proveedores
 
+
 def buscar_proveedor(proveedores, nombre):
-    #Busca un proveedor en la matriz por su nombre
-    #Retorna una lista de filas con las coincidencias con el nombre
     resultado = []
     for fila in proveedores:
         if fila[1].lower() == nombre.lower():
@@ -15,46 +16,60 @@ def buscar_proveedor(proveedores, nombre):
     return resultado
 
 
-def modificar_proveedor(proveedores, nombre, nuevo_nombre, nuevo_telefono, nuevo_mail):
-    #Modifica los datos de un proveedor en la matriz introduciendo su nombre
-    for proveedor in proveedores:
-        if proveedor[1].lower() == nombre.lower():
-            proveedor[1] = nuevo_nombre
-            proveedor[2] = nuevo_telefono
-            proveedor[3] = nuevo_mail
+def modificar_proveedor(proveedores, nombre, nuevo_nombre, nuevo_telefono, nuevo_mail, productos_dic):
+    """
+    Modifica proveedor en la matriz y también en los productos.
+    """
+
+    # Modificar en matriz
+    for fila in proveedores:
+        if fila[1].lower() == nombre.lower():
+            fila[1] = nuevo_nombre
+            fila[2] = nuevo_telefono
+            fila[3] = nuevo_mail
+
+    # Modificar en productos
+    for p in productos_dic:
+        if p["proveedor"].lower() == nombre.lower():
+            p["proveedor"] = nuevo_nombre
+
     return proveedores
 
 
-def eliminar_proveedor(proveedores, nombre):
-    #Elimina un proveedor de la matriz introduciendo su npmbre
-    nuevos_proveedores = []
+def eliminar_proveedor(proveedores, nombre, productos_dic):
+    """
+    Solo elimina si NO hay productos asociados.
+    """
+
+    # Verificar si el proveedor tiene productos
+    for p in productos_dic:
+        if p["proveedor"].lower() == nombre.lower():
+            print("No se puede eliminar: el proveedor tiene productos asociados.")
+            return proveedores
+
+    nuevos = []
     for fila in proveedores:
         if fila[1].lower() != nombre.lower():
-            nuevos_proveedores.append(fila)
-    proveedores[:] = nuevos_proveedores
+            nuevos.append(fila)
+
+    proveedores[:] = nuevos
     return proveedores
 
 
-def mostrar_proveedores(proveedores):
-    #Muestra la matriz completa de proveedores
-    return proveedores
-
-
-def buscar_productos_por_proveedor(inventario, proveedor):
-    # Busca los productos que pertenecen al proveedor asignado
+def buscar_productos_por_proveedor(productos_dic, proveedor):
     resultado = []
-    for fila in inventario:
-        if re.search(proveedor, fila[4], re.IGNORECASE):
-            resultado.append(fila)
+
+    for p in productos_dic:
+        if re.search(proveedor, p["proveedor"], re.IGNORECASE):
+            resultado.append(p)
+
     return resultado
 
-def stock_por_proveedor(inventario, proveedor):
-    # Suma el stock de los productos del proveedor
+def stock_por_proveedor(productos_dic, proveedor):
     total = 0
 
-    for fila in inventario:
-        if re.search(proveedor, fila[4], re.IGNORECASE):
-            total += fila[3]
+    for p in productos_dic:
+        if re.search(proveedor, p["proveedor"], re.IGNORECASE):
+            total += p["stock"]
 
     return total
-

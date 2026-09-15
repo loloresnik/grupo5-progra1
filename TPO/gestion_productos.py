@@ -1,5 +1,4 @@
 import re
-from functools import reduce
 
 # Agregar producto
 def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedores_unicos):
@@ -62,12 +61,22 @@ def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedor
 
         stock = input("Ingrese el stock inicial: ").strip()
 
+    # Precio 
+    precio = input("Ingrese el precio del producto: ").strip()
+
+    while not precio.isdigit():
+
+        print("El precio debe ser numerico.")
+
+        precio = input("Ingrese el precio del producto: ").strip()
+
     nuevo = {
         "id": id_prod,
         "nombre": nombre,
         "categoria": categoria,
         "proveedor": proveedor,
-        "stock": int(stock)
+        "stock": int(stock),
+        "precio": int(precio)
     }
 
     productos_dic.append(nuevo)
@@ -78,6 +87,7 @@ def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedor
     proveedores_unicos.add(proveedor)
 
     print("Producto agregado correctamente.\n")
+
     return 1
 
 
@@ -91,7 +101,7 @@ def buscar_producto_dic(productos_dic, id_prod):
         if p["id"] == id_prod:
 
             return p
-
+        
     return None
 
 
@@ -106,20 +116,21 @@ def mostrar_productos_dic(productos_dic):
         return
 
     print("\n--- LISTA DE PRODUCTOS ---")
-    print("-" * 80)
-    print("ID             Nombre          Categoria       Proveedor       Stock")
-    print("-" * 80)
+    print("-" * 100)
+    print("ID             Nombre          Categoria       Proveedor       Stock     Precio")
+    print("-" * 100)
 
     for p in productos_dic:
 
-        print(f"{p['id']:<15} {p['nombre']:<15} {p['categoria']:<15} {p['proveedor']:<15} {p['stock']:>5}")
+        print(f"{p['id']:<15} {p['nombre']:<15} {p['categoria']:<15} {p['proveedor']:<15} {p['stock']:<10} ${p['precio']}")
 
-    print("-" * 80)
+    print("-" * 100)
 
 
 # Modificar producto 
-def modificar_producto_dic(productos_dic, id_prod, nuevo_nombre, nueva_categoria, nuevo_proveedor, categorias_unicas, proveedores_unicos):
-    #Modifica los datos de un producto existente.
+def modificar_producto_dic(productos_dic, id_prod, nuevo_nombre, nueva_categoria, nuevo_proveedor, nuevo_precio, categorias_unicas, proveedores_unicos):
+    """Modifica los datos de un producto existente."""
+
     producto = buscar_producto_dic(productos_dic, id_prod)
 
     if producto is None:
@@ -135,35 +146,45 @@ def modificar_producto_dic(productos_dic, id_prod, nuevo_nombre, nueva_categoria
     if nueva_categoria is not None:
 
         producto["categoria"] = nueva_categoria
-
-        categorias_unicas.add(nueva_categoria)
+        categorias_unicas.add(nueva_categoria)   
 
     if nuevo_proveedor is not None:
 
         producto["proveedor"] = nuevo_proveedor
-
         proveedores_unicos.add(nuevo_proveedor)
 
-    print("Producto modificado correctamente.")
+    if nuevo_precio is not None:
 
+        producto["precio"] = nuevo_precio
+
+    print("Producto modificado correctamente.")
     return 1
 
 
 # Eliminar producto
 def eliminar_producto_dic(productos_dic, id_prod, ids_unicos):
+    """Elimina un producto por ID."""
 
     for i in range(len(productos_dic)):
+
         if productos_dic[i]["id"] == id_prod:
+
             productos_dic.pop(i)
+
             ids_unicos.remove(id_prod)
+
             print("Producto eliminado.")
+
             return 1
 
     print("Producto no encontrado.")
+
     return 0
+
 
 # Registrar movimiento (ingreso o egreso)
 def agregar_movimiento(movimientos, tipo, id_prod, cantidad, productos_dic):
+    """Registra un movimiento en la matriz de movimientos."""
 
     print("\n=== Registrar movimiento ===")
 
@@ -192,7 +213,6 @@ def agregar_movimiento(movimientos, tipo, id_prod, cantidad, productos_dic):
     mes = int(mes)
     anio = int(anio)
 
-    # hay alguna libreria que tenga la fecha asi no tengo que hacer esta validacion? 
     # Validar rangos
     if dia < 1 or dia > 31:
 
@@ -207,7 +227,9 @@ def agregar_movimiento(movimientos, tipo, id_prod, cantidad, productos_dic):
         return 0
 
     if anio <= 0:
+
         print("Año invalido.")
+
         return 0
 
     fecha = (dia, mes, anio)
@@ -220,13 +242,15 @@ def agregar_movimiento(movimientos, tipo, id_prod, cantidad, productos_dic):
 
     return 1
 
+
 # Mostrar movimientos
 def mostrar_movimientos(movimientos):
+    """Muestra todos los movimientos registrados."""
 
     if len(movimientos) == 0:
-        
+
         print("No hay movimientos registrados.")
-        
+
         return
 
     print("\n--- GESTION DE MOVIMIENTOS ---")
@@ -245,13 +269,16 @@ def mostrar_movimientos(movimientos):
 
 # Filtrar movimientos por tipo
 def filtrar_movimientos(movimientos, tipo):
+    """Filtra los movimientos por tipo (ingreso o egreso)."""
 
     filtrados = list(filter(lambda m: m[0] == tipo, movimientos))
 
     mostrar_movimientos(filtrados)
 
 
+# Ingreso de stock
 def ingreso_stock_dic(productos_dic, id_prod, cantidad):
+    """Registra un ingreso de stock."""
 
     producto = buscar_producto_dic(productos_dic, id_prod)
 
@@ -274,7 +301,9 @@ def ingreso_stock_dic(productos_dic, id_prod, cantidad):
     return 1
 
 
+# Egreso de stock
 def egreso_stock_dic(productos_dic, id_prod, cantidad):
+    """Registra un egreso de stock."""
 
     producto = buscar_producto_dic(productos_dic, id_prod)
 
@@ -299,5 +328,5 @@ def egreso_stock_dic(productos_dic, id_prod, cantidad):
     producto["stock"] -= cantidad
 
     print("Egreso registrado. Nuevo stock:", producto["stock"])
-
+    
     return 1

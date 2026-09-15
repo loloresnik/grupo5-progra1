@@ -1,80 +1,236 @@
-def ventas_totales(inventario):
-    return sum(item[2] for item in inventario.values())
+from functools import reduce
+
+# Registrar venta
+def registrar_venta(ventas_dic, productos_dic, id_prod, cantidad):
+    producto = None
+    for p in productos_dic:
+        if p["id"] == id_prod:
+            producto = p
+            break
+
+    if producto is None:
+        print("Producto no encontrado.")
+        return 0
+
+    if cantidad > producto["stock"]:
+        print("Stock insuficiente.")
+        return 0
+
+    producto["stock"] -= cantidad
+
+    if id_prod in ventas_dic:
+        ventas_dic[id_prod] += cantidad
+    else:
+        ventas_dic[id_prod] = cantidad
+
+    print("Venta registrada correctamente.")
+    return 1
 
 
-def top_mas_vendidos(inventario):
-    lista_para_ordenar = []
-    for nombre, datos in inventario.items():
-        lista_para_ordenar.append((datos[2], nombre))
-    
-    lista_ordenada = sorted(lista_para_ordenar)[::-1][:3]
-    return tuple(nombre for cantidad, nombre in lista_ordenada)
+# Mostrar ventas
+def mostrar_ventas(ventas_dic, productos_dic):
+    if len(ventas_dic) == 0:
+        print("No hay ventas registradas.")
+        return
+
+    print("\n--- LISTA DE VENTAS ---")
+    print("-" * 60)
+    print("ID Producto     Nombre           Cantidad Vendida")
+    print("-" * 60)
+
+    for id_prod in ventas_dic:
+        cantidad = ventas_dic[id_prod]
+        nombre = "Desconocido"
+
+        for p in productos_dic:
+            if p["id"] == id_prod:
+                nombre = p["nombre"]
+                break
+
+        print(f"{id_prod:<15} {nombre:<15} {cantidad:<10}")
+
+    print("-" * 60)
 
 
-def menos_vendidos(inventario):
-    lista_para_ordenar = []
-    for nombre, datos in inventario.items():
-        lista_para_ordenar.append((datos[2], nombre))
-        
-    lista_ordenada = sorted(lista_para_ordenar)[:3]
-    return tuple(nombre for cantidad, nombre in lista_ordenada)
+# Ventas totales
+def ventas_totales(ventas_dic):
+    total = 0
+    for id_prod in ventas_dic:
+        total += ventas_dic[id_prod]
+    return total
 
 
-def productos_mas_caros(inventario):
-    lista_para_ordenar = []
-    for nombre, datos in inventario.items():
-        lista_para_ordenar.append((datos[0], nombre))
-        
-    lista_ordenada = sorted(lista_para_ordenar)[::-1][:3]
-    return tuple(nombre for precio, nombre in lista_ordenada)
+# Top 3 más vendidos
+def top_mas_vendidos(ventas_dic, productos_dic):
+    lista = []
+
+    for id_prod in ventas_dic:
+        cantidad = ventas_dic[id_prod]
+        nombre = None
+
+        for p in productos_dic:
+            if p["id"] == id_prod:
+                nombre = p["nombre"]
+                break
+
+        lista.append((cantidad, nombre))
+
+    lista_ordenada = sorted(lista, reverse=True)[:3]
+
+    return [nombre for cantidad, nombre in lista_ordenada]
 
 
-def productos_menos_caros(inventario):
-    lista_para_ordenar = []
-    for nombre, datos in inventario.items():
-        lista_para_ordenar.append((datos[0], nombre))
-        
-    lista_ordenada = sorted(lista_para_ordenar)[:3]
-    return tuple(nombre for precio, nombre in lista_ordenada)
+# Top 3 menos vendidos
+def menos_vendidos(ventas_dic, productos_dic):
+    lista = []
+
+    for id_prod in ventas_dic:
+        cantidad = ventas_dic[id_prod]
+        nombre = None
+
+        for p in productos_dic:
+            if p["id"] == id_prod:
+                nombre = p["nombre"]
+                break
+
+        lista.append((cantidad, nombre))
+
+    lista_ordenada = sorted(lista)[:3]
+
+    return [nombre for cantidad, nombre in lista_ordenada]
 
 
-def recaudacion_total(inventario):
-    return sum(item[0] * item[2] for item in inventario.values())
+# Recaudación total
+def recaudacion_total(ventas_dic, productos_dic):
+    total = 0
+
+    for id_prod in ventas_dic:
+        cantidad = ventas_dic[id_prod]
+
+        for p in productos_dic:
+            if p["id"] == id_prod:
+                total += cantidad * p["precio"]
+                break
+
+    return total
 
 
-def buscar_por_proveedor(inventario, proveedor):
-    elementos_filtrados = filter(lambda item: item[1][4].lower() == proveedor.lower(), inventario.items())
-    resultados = list(elementos_filtrados)
-    return resultados
+# Producto más caro
+def producto_mas_caro(productos_dic):
+    if len(productos_dic) == 0:
+        return None
+
+    mayor = productos_dic[0]
+
+    for p in productos_dic:
+        if p["precio"] > mayor["precio"]:
+            mayor = p
+
+    return mayor
 
 
-def buscar_por_categoria(inventario, categoria):
-    elementos_filtrados = filter(lambda item: item[1][3].lower() == categoria.lower(), inventario.items())
-    resultados = list(elementos_filtrados)
-    return resultados
+# Producto menos caro
+def producto_menos_caro(productos_dic):
+    if len(productos_dic) == 0:
+        return None
+
+    menor = productos_dic[0]
+
+    for p in productos_dic:
+        if p["precio"] < menor["precio"]:
+            menor = p
+
+    return menor
 
 
-def total_stock(inventario):
-    return sum(datos[1] for datos in inventario.values())
+# Valor total del stock
+def valor_total_stock(productos_dic):
+    total = 0
+    for p in productos_dic:
+        total += p["stock"] * p["precio"]
+    return total
 
 
-def porcentaje_stock_por_proveedor(inventario):
-    total_absoluto = sum(map(lambda fila: fila[1], inventario.values()))
+# Valor por categoría
+def valor_por_categoria(productos_dic):
+    categorias = {}
 
-    if total_absoluto == 0:
-        return []
+    for p in productos_dic:
+        cat = p["categoria"]
+        valor = p["stock"] * p["precio"]
 
-    proveedores_unicos = []
-    for fila in inventario.values():
-        if fila[4] not in proveedores_unicos:
-            proveedores_unicos.append(fila[4])
+        if cat in categorias:
+            categorias[cat] += valor
+        else:
+            categorias[cat] = valor
 
-    estadisticas = []
-    for prov in proveedores_unicos:
-        productos_prov = filter(lambda fila: fila[4] == prov, inventario.values())
-        stock_proveedor = sum(map(lambda fila: fila[1], productos_prov))
+    return categorias
 
-        porcentaje = (stock_proveedor / total_absoluto) * 100
-        estadisticas.append([prov, round(porcentaje, 2)])
 
-    return sorted(estadisticas, key=lambda fila: fila[1])[::-1]
+# Porcentaje del valor por categoría
+def porcentaje_valor_por_categoria(productos_dic):
+    total = valor_total_stock(productos_dic)
+
+    if total == 0:
+        return {}
+
+    valores = valor_por_categoria(productos_dic)
+    porcentajes = {}
+
+    for cat in valores:
+        porcentaje = (valores[cat] / total) * 100
+        porcentaje = round(porcentaje, 2) 
+        porcentajes[cat] = porcentaje
+
+    return porcentajes
+
+
+# Buscar por proveedor
+def buscar_por_proveedor(productos_dic, proveedor):
+    proveedor = proveedor.lower()
+    resultado = []
+
+    for p in productos_dic:
+        if p["proveedor"].lower() == proveedor:
+            resultado.append(p)
+
+    return resultado
+
+
+# Buscar por categoría
+def buscar_por_categoria(productos_dic, categoria):
+    categoria = categoria.lower()
+    resultado = []
+
+    for p in productos_dic:
+        if p["categoria"].lower() == categoria:
+            resultado.append(p)
+
+    return resultado
+
+
+# Promedio de precio
+def promedio_precio(productos_dic):
+    if len(productos_dic) == 0:
+        return 0
+
+    total = 0
+    for p in productos_dic:
+        total += p["precio"]
+
+    return total / len(productos_dic)
+
+
+# precios con IVA
+def precios_con_iva(productos_dic):
+    return list(map(lambda p: p["precio"] * 1.21, productos_dic))
+
+
+# valor total del inventario
+def valor_total_reduce(productos_dic):
+    return reduce(lambda total, p: total + (p["precio"] * p["stock"]), productos_dic, 0)
+
+
+# productos sin stock
+def productos_sin_stock(productos_dic):
+    return list(filter(lambda p: p["stock"] == 0, productos_dic))
