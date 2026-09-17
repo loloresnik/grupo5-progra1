@@ -23,17 +23,16 @@ def mostrar_menu_usuario():
     print("6. Cerrar sesión")
 
 
-def iniciar_sesion():
+def iniciar_sesion(usuarios):
     usuario = input("Ingrese usuario: ")
     contraseña = input("Ingrese contraseña: ")
 
-    if usuario == "admin" and contraseña == "1234":
-        return "admin"
-    elif usuario == "usuario" and contraseña == "1234":
-        return "usuario"
-    else:
-        print("Usuario o contraseña incorrectos.")
-        return ""
+    for u in usuarios:
+        if u["usuario"] == usuario and u["clave"] == contraseña:
+            return u["tipo"]
+
+    print("Usuario o contraseña incorrectos.")
+    return ""
 
 
 def menu_admin():
@@ -78,5 +77,3 @@ def menu_usuario():
             print("Cerrando sesión...")
         else:
             print("Opción inválida")
-
-

@@ -17,6 +17,81 @@ ids_unicos = set()
 categorias_unicas = set()
 proveedores_unicos = set()
 
+usuarios = [
+    {"usuario": "admin", "clave": "1234", "tipo": "admin"},
+    {"usuario": "usuario", "clave": "1234", "tipo": "usuario"}
+]
+
+
+# ==========================================================
+# ALTA DE EMPLEADO
+# ==========================================================
+
+def alta_usuario():
+
+    print("\n===== ALTA DE EMPLEADO =====")
+
+    nombre_usuario = input("Ingrese nombre de usuario: ")
+
+    existe = 0
+
+    for u in usuarios:
+        if u["usuario"] == nombre_usuario:
+            existe = 1
+
+    if existe == 1:
+        print("El usuario ya existe.")
+
+    else:
+
+        clave = input("Ingrese contraseña: ")
+
+        nuevo_usuario = {
+            "usuario": nombre_usuario,
+            "clave": clave,
+            "tipo": "usuario"
+        }
+
+        usuarios.append(nuevo_usuario)
+
+        print("Empleado creado correctamente.")
+
+
+# ==========================================================
+# BAJA DE EMPLEADO
+# ==========================================================
+
+def baja_usuario():
+
+    print("\n===== BAJA DE EMPLEADO =====")
+
+    nombre_usuario = input(
+        "Ingrese nombre de usuario a eliminar: "
+    )
+
+    encontrado = 0
+
+    for i in range(len(usuarios)):
+
+        if usuarios[i]["usuario"] == nombre_usuario:
+
+            if usuarios[i]["tipo"] == "admin":
+
+                print("No se puede eliminar el administrador.")
+
+            else:
+
+                usuarios.pop(i)
+
+                print("Empleado eliminado correctamente.")
+
+            encontrado = 1
+            break
+
+    if encontrado == 0:
+
+        print("Empleado no encontrado.")
+
 
 # ==========================================================
 # MENU DE PRODUCTOS
@@ -59,8 +134,12 @@ def menu_productos():
             id_prod = input("Ingrese ID del producto: ")
 
             while id_prod.isdigit() is False:
+
                 print("El ID debe ser numerico.")
-                id_prod = input("Ingrese ID del producto: ")
+
+                id_prod = input(
+                    "Ingrese ID del producto: "
+                )
 
             id_prod = int(id_prod)
 
@@ -70,8 +149,11 @@ def menu_productos():
             )
 
             if producto is None:
+
                 print("Producto no encontrado.")
+
             else:
+
                 print("\nProducto encontrado:")
                 print(producto)
 
@@ -83,7 +165,9 @@ def menu_productos():
             )
 
             while id_prod.isdigit() is False:
+
                 print("El ID debe ser numerico.")
+
                 id_prod = input(
                     "Ingrese ID del producto a modificar: "
                 )
@@ -101,7 +185,9 @@ def menu_productos():
 
             else:
 
-                print("\nDeje vacio un campo si no desea modificarlo.")
+                print(
+                    "\nDeje vacio un campo si no desea modificarlo."
+                )
 
                 nuevo_nombre = input(
                     "Nuevo nombre: "
@@ -134,7 +220,9 @@ def menu_productos():
                 else:
 
                     while nuevo_precio.isdigit() is False:
+
                         print("El precio debe ser numerico.")
+
                         nuevo_precio = input(
                             "Nuevo precio: "
                         ).strip()
@@ -160,7 +248,9 @@ def menu_productos():
             )
 
             while id_prod.isdigit() is False:
+
                 print("El ID debe ser numerico.")
+
                 id_prod = input(
                     "Ingrese ID del producto a eliminar: "
                 )
@@ -203,17 +293,29 @@ def menu_movimientos():
         # INGRESO
         if opcion == "1":
 
-            id_prod = input("Ingrese ID del producto: ")
+            id_prod = input(
+                "Ingrese ID del producto: "
+            )
 
             while id_prod.isdigit() is False:
-                print("El ID debe ser numerico.")
-                id_prod = input("Ingrese ID del producto: ")
 
-            cantidad = input("Ingrese cantidad: ")
+                print("El ID debe ser numerico.")
+
+                id_prod = input(
+                    "Ingrese ID del producto: "
+                )
+
+            cantidad = input(
+                "Ingrese cantidad: "
+            )
 
             while cantidad.isdigit() is False:
+
                 print("La cantidad debe ser numerica.")
-                cantidad = input("Ingrese cantidad: ")
+
+                cantidad = input(
+                    "Ingrese cantidad: "
+                )
 
             id_prod = int(id_prod)
             cantidad = int(cantidad)
@@ -237,17 +339,29 @@ def menu_movimientos():
         # EGRESO
         elif opcion == "2":
 
-            id_prod = input("Ingrese ID del producto: ")
+            id_prod = input(
+                "Ingrese ID del producto: "
+            )
 
             while id_prod.isdigit() is False:
-                print("El ID debe ser numerico.")
-                id_prod = input("Ingrese ID del producto: ")
 
-            cantidad = input("Ingrese cantidad: ")
+                print("El ID debe ser numerico.")
+
+                id_prod = input(
+                    "Ingrese ID del producto: "
+                )
+
+            cantidad = input(
+                "Ingrese cantidad: "
+            )
 
             while cantidad.isdigit() is False:
+
                 print("La cantidad debe ser numerica.")
-                cantidad = input("Ingrese cantidad: ")
+
+                cantidad = input(
+                    "Ingrese cantidad: "
+                )
 
             id_prod = int(id_prod)
             cantidad = int(cantidad)
@@ -327,7 +441,9 @@ def menu_proveedores():
             )
 
             while id_proveedor.isdigit() is False:
+
                 print("El ID debe ser numerico.")
+
                 id_proveedor = input(
                     "Ingrese ID del proveedor: "
                 )
@@ -459,6 +575,7 @@ def menu_proveedores():
                 print("\nProductos encontrados:")
 
                 for producto in resultado:
+
                     print(producto)
 
         # STOCK POR PROVEEDOR
@@ -516,6 +633,7 @@ def menu_categorias():
                 print("\n--- CATEGORIAS ---")
 
                 for categoria in categorias_unicas:
+
                     print("-", categoria)
 
         # BUSCAR POR CATEGORIA
@@ -539,6 +657,7 @@ def menu_categorias():
                 print("\nProductos encontrados:")
 
                 for producto in resultado:
+
                     print(producto)
 
         # VALOR POR CATEGORIA
@@ -635,7 +754,9 @@ def menu_reportes():
             )
 
             while id_prod.isdigit() is False:
+
                 print("El ID debe ser numerico.")
+
                 id_prod = input(
                     "Ingrese ID del producto: "
                 )
@@ -645,7 +766,9 @@ def menu_reportes():
             )
 
             while cantidad.isdigit() is False:
+
                 print("La cantidad debe ser numerica.")
+
                 cantidad = input(
                     "Ingrese cantidad: "
                 )
@@ -697,6 +820,7 @@ def menu_reportes():
                 print("\nTop 3 mas vendidos:")
 
                 for nombre in resultado:
+
                     print("-", nombre)
 
         # MENOS VENDIDOS
@@ -716,6 +840,7 @@ def menu_reportes():
                 print("\nTop 3 menos vendidos:")
 
                 for nombre in resultado:
+
                     print("-", nombre)
 
         # RECAUDACION
@@ -839,6 +964,7 @@ def menu_reportes():
             else:
 
                 for producto in resultado:
+
                     print(producto)
 
         # BUSCAR CATEGORIA
@@ -860,6 +986,7 @@ def menu_reportes():
             else:
 
                 for producto in resultado:
+
                     print(producto)
 
         # PROMEDIO
@@ -922,6 +1049,7 @@ def menu_reportes():
                 print("\nProductos sin stock:")
 
                 for producto in resultado:
+
                     print(producto)
 
         elif opcion == "0":
@@ -950,6 +1078,8 @@ def menu_admin():
         print("3. Gestion de proveedores")
         print("4. Categorias")
         print("5. Reportes")
+        print("6. Alta de empleado")
+        print("7. Baja de empleado")
         print("0. Cerrar sesion")
 
         opcion = input("Seleccione una opcion: ")
@@ -973,6 +1103,14 @@ def menu_admin():
         elif opcion == "5":
 
             menu_reportes()
+
+        elif opcion == "6":
+
+            alta_usuario()
+
+        elif opcion == "7":
+
+            baja_usuario()
 
         elif opcion == "0":
 
@@ -1047,7 +1185,7 @@ def main():
         print("    GESTION DE INVENTARIO")
         print("==============================")
 
-        usuario = menu.iniciar_sesion()
+        usuario = menu.iniciar_sesion(usuarios)
 
         if usuario == "admin":
 
@@ -1067,8 +1205,5 @@ def main():
 # ==========================================================
 
 if __name__ == "__main__":
+
     main()
-
-
-
-
