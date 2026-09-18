@@ -183,7 +183,7 @@ def eliminar_producto_dic(productos_dic, id_prod, ids_unicos):
     return 0
 
 
-# Registrar movimiento (ingreso o egreso)
+# Registrar movimiento
 def agregar_movimiento(movimientos, tipo, id_prod, cantidad, productos_dic):
     """Registra un movimiento en la matriz de movimientos."""
 
@@ -260,17 +260,6 @@ def mostrar_movimientos(movimientos):
 
     print("-" * 80)
 
-
-# Filtrar movimientos por tipo
-def filtrar_movimientos(movimientos, tipo):
-
-    """Filtra los movimientos por tipo (ingreso o egreso)."""
-
-    filtrados = list(filter(lambda m: m[0] == tipo, movimientos))
-
-    mostrar_movimientos(filtrados)
-
-
 # Ingreso de stock
 def ingreso_stock_dic(productos_dic, id_prod, cantidad):
     """Registra un ingreso de stock."""
@@ -292,36 +281,5 @@ def ingreso_stock_dic(productos_dic, id_prod, cantidad):
     producto["stock"] += cantidad
 
     print("Ingreso registrado. Nuevo stock:", producto["stock"])
-
-    return 1
-
-
-# Egreso de stock
-def egreso_stock_dic(productos_dic, id_prod, cantidad):
-    """Registra un egreso de stock."""
-
-    producto = buscar_producto_dic(productos_dic, id_prod)
-
-    if producto is None:
-
-        print("Producto no encontrado.")
-
-        return 0
-
-    if cantidad <= 0:
-
-        print("Cantidad inválida.")
-
-        return 0
-
-    if producto["stock"] < cantidad:
-
-        print("Stock insuficiente.")
-
-        return 0
-
-    producto["stock"] -= cantidad
-
-    print("Egreso registrado. Nuevo stock:", producto["stock"])
 
     return 1
