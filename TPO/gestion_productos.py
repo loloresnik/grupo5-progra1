@@ -10,7 +10,7 @@ def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedor
     # ID
     id_prod = input("Ingrese ID del producto: ").strip()
 
-    while re.match(r"^\d+$ ", id_prod) is None:
+    while re.match(r"^\d+$", id_prod) is None:
 
         print("El ID debe ser numérico.")
 
@@ -27,7 +27,7 @@ def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedor
     # Nombre
     nombre = input("Ingrese el nombre del producto: ").strip()
 
-    while re.match("^[A-Za-z ]+$", nombre) is None:
+    while re.match(r"^[A-Za-z ]+$", nombre) is None:
 
         print("El nombre solo puede contener letras.")
 
@@ -36,7 +36,7 @@ def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedor
     # Categoría
     categoria = input("Ingrese la categoría: ").strip()
 
-    while re.match("^[A-Za-z ]+$", categoria) is None:
+    while re.match(r"^[A-Za-z ]+$", categoria) is None:
 
         print("La categoría solo puede contener letras.")
 
@@ -45,7 +45,7 @@ def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedor
     # Proveedor
     proveedor = input("Ingrese el proveedor: ").strip()
 
-    while re.match("^[A-Za-z ]+$", proveedor) is None:
+    while re.match(r"^[A-Za-z ]+$", proveedor) is None:
 
         print("El proveedor solo puede contener letras.")
 
@@ -91,7 +91,7 @@ def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedor
 
 # Buscar producto 
 def buscar_producto_dic(productos_dic, id_prod):
-    """Recorre y devuelve el diccionario del producto si encuentra coincidencia.
+    """Recorre la lista y devuelve el diccionario del producto si encuentra coincidencia.
     Si no existe, devuelve None."""
 
     for p in productos_dic:
