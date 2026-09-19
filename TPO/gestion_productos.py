@@ -91,7 +91,7 @@ def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedor
 
 # Buscar producto 
 def buscar_producto_dic(productos_dic, id_prod):
-    """Recorre la lista y devuelve el diccionario del producto si encuentra coincidencia.
+    """Recorre y devuelve el diccionario del producto si encuentra coincidencia.
     Si no existe, devuelve None."""
 
     for p in productos_dic:
