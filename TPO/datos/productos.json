@@ -1,0 +1,51 @@
+{
+    "1001": {
+        "nombre": "Mouse",
+        "categoria": "Perifericos",
+        "id_proveedor": 1,
+        "stock": 23,
+        "precio": 8500
+    },
+    "1002": {
+        "nombre": "Teclado",
+        "categoria": "Perifericos",
+        "id_proveedor": 1,
+        "stock": 15,
+        "precio": 15000
+    },
+    "1003": {
+        "nombre": "Auriculares",
+        "categoria": "Perifericos",
+        "id_proveedor": 1,
+        "stock": 8,
+        "precio": 22000
+    },
+    "2001": {
+        "nombre": "Pendrive 64GB",
+        "categoria": "Almacenamiento",
+        "id_proveedor": 2,
+        "stock": 35,
+        "precio": 6500
+    },
+    "2002": {
+        "nombre": "SSD 1TB",
+        "categoria": "Almacenamiento",
+        "id_proveedor": 2,
+        "stock": 15,
+        "precio": 65000
+    },
+    "3001": {
+        "nombre": "Monitor 24",
+        "categoria": "Pantallas",
+        "id_proveedor": 3,
+        "stock": 6,
+        "precio": 180000
+    },
+    "3002": {
+        "nombre": "Monitor 27",
+        "categoria": "Pantallas",
+        "id_proveedor": 3,
+        "stock": 0,
+        "precio": 290000
+    }
+}

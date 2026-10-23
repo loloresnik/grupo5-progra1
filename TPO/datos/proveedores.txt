@@ -1,0 +1,4 @@
+1;Logitech;11-45678901;ventas@logitech.com
+2;Kingston;11-40001111;info@kingston.com.ar
+3;Samsung;0800-5557267;contacto@samsung.com.ar
+4;Distribuidora Ñandú;0221-4567890;pedidos@nandu.com

@@ -1,0 +1,10 @@
+{
+    "admin": {
+        "clave": "1234",
+        "tipo": "admin"
+    },
+    "usuario": {
+        "clave": "1234",
+        "tipo": "usuario"
+    }
+}

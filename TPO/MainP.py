@@ -1,53 +1,35 @@
 import menu
+import archivos
+
 
 def main():
-    
-    productos_dic = []
-    movimientos = []
-    ventas_dic = {}
-    proveedores_lista = []
-
-    ids_unicos = set()
-    categorias_unicas = set()
-    proveedores_unicos = set()
-
-    usuarios = [
-        {"usuario": "admin", "clave": "1234", "tipo": "admin"},
-        {"usuario": "usuario", "clave": "1234", "tipo": "usuario"}
-    ]
+    # Toda la información se recupera desde los archivos de la carpeta "datos"
+    datos = archivos.cargar_datos()
 
     while True:
         print("\n==============================")
         print("    GESTION DE INVENTARIO")
         print("==============================")
+        print("1. Iniciar sesion")
+        print("0. Salir")
 
-        tipo = menu.iniciar_sesion(usuarios)
+        opcion = input("Seleccione una opcion: ").strip()
 
-        if tipo == "admin":
-            menu.menu_admin(
-                usuarios,
-                productos_dic,
-                movimientos,
-                ventas_dic,
-                proveedores_lista,
-                ids_unicos,
-                categorias_unicas,
-                proveedores_unicos
-            )
+        if opcion == "1":
+            sesion = menu.iniciar_sesion(datos["usuarios"])
 
-        elif tipo == "usuario":
-            menu.menu_usuario(
-                productos_dic,
-                movimientos,
-                ventas_dic,
-                proveedores_lista,
-                ids_unicos,
-                categorias_unicas,
-                proveedores_unicos
-            )
+            if sesion is not None:
+                usuario, rol = sesion
+                menu.menu_principal(datos, rol)
+
+        elif opcion == "0":
+            archivos.guardar_datos(datos)
+            print("Datos guardados. Hasta luego.")
+            break
 
         else:
-            print("No se pudo iniciar sesion.")
+            print("Opcion invalida.")
+
 
 if __name__ == "__main__":
     main()
