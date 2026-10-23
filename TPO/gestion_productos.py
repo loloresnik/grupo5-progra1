@@ -1,285 +1,184 @@
-import re
+import validaciones
+import proveedores as prov
+
+# Los productos se guardan en un diccionario cuya clave es el ID:
+# productos = {1001: {"nombre": "Teclado", "categoria": "Perifericos",
+#                     "id_proveedor": 1, "stock": 20, "precio": 15000.0}}
+#
+# Los movimientos se guardan en una matriz (lista de listas):
+# movimiento = [tipo, id_producto, cantidad, (dia, mes, anio)]
+
+TIPOS_MOVIMIENTO = ("Ingreso", "Egreso")
+
 
 # Agregar producto
-def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedores_unicos):
-    """Registra un nuevo producto en la lista de diccionarios.
-    Valida cada campo ingresado por el usuario y evita que se repitan IDs utilizando un conjunto."""
+def alta_producto(productos, proveedores, id_prod, nombre, categoria, id_proveedor, stock, precio):
+    """Registra un nuevo producto.
+    Lanza ValueError si el ID está repetido, el proveedor no existe o algún dato es inválido."""
 
-    print("\n=== AGREGAR PRODUCTO ===")
+    if id_prod in productos:
+        raise ValueError("El ID ya existe.")
 
-    # ID
-    id_prod = input("Ingrese ID del producto: ").strip()
+    if id_prod <= 0:
+        raise ValueError("El ID debe ser mayor a 0.")
 
-    while re.match(r"^\d+$", id_prod) is None:
+    if not validaciones.validar_texto(nombre):
+        raise ValueError("El nombre es inválido.")
 
-        print("El ID debe ser numérico.")
+    if not validaciones.validar_texto(categoria):
+        raise ValueError("La categoría es inválida.")
 
-        id_prod = input("Ingrese ID del producto: ").strip()
+    if prov.buscar_proveedor_por_id(proveedores, id_proveedor) is None:
+        raise ValueError("No existe un proveedor con ese ID.")
 
-    id_prod = int(id_prod)
+    if stock < 0 or precio < 0:
+        raise ValueError("El stock y el precio no pueden ser negativos.")
 
-    if id_prod in ids_unicos:
-
-        print("El ID ya existe.")
-
-        return 0
-
-    # Nombre
-    nombre = input("Ingrese el nombre del producto: ").strip()
-
-    while re.match(r"^[A-Za-z ]+$", nombre) is None:
-
-        print("El nombre solo puede contener letras.")
-
-        nombre = input("Ingrese el nombre del producto: ").strip()
-
-    # Categoría
-    categoria = input("Ingrese la categoría: ").strip()
-
-    while re.match(r"^[A-Za-z ]+$", categoria) is None:
-
-        print("La categoría solo puede contener letras.")
-
-        categoria = input("Ingrese la categoría: ").strip()
-
-    # Proveedor
-    proveedor = input("Ingrese el proveedor: ").strip()
-
-    while re.match(r"^[A-Za-z ]+$", proveedor) is None:
-
-        print("El proveedor solo puede contener letras.")
-
-        proveedor = input("Ingrese el proveedor: ").strip()
-
-    # Stock
-    stock = input("Ingrese el stock inicial: ").strip()
-
-    while re.match(r"^\d+$", stock) is None:
-
-        print("El stock debe ser numérico.")
-
-        stock = input("Ingrese el stock inicial: ").strip()
-
-    # Precio
-    precio = input("Ingrese el precio del producto: ").strip()
-
-    while re.match(r"^\d+$", precio) is None:
-
-        print("El precio debe ser numérico.")
-
-        precio = input("Ingrese el precio del producto: ").strip()
-
-    nuevo = {
-        "id": id_prod,
-        "nombre": nombre,
-        "categoria": categoria,
-        "proveedor": proveedor,
-        "stock": int(stock),
-        "precio": int(precio)
+    productos[id_prod] = {
+        "nombre": validaciones.capitalizar(nombre),
+        "categoria": validaciones.capitalizar(categoria),
+        "id_proveedor": id_proveedor,
+        "stock": stock,
+        "precio": precio
     }
 
-    productos_dic.append(nuevo)
 
-    ids_unicos.add(id_prod)
-    categorias_unicas.add(categoria)
-    proveedores_unicos.add(proveedor)
-
-    print("Producto agregado correctamente.\n")
-
-    return 1
+# Buscar producto
+def buscar_producto_dic(productos, id_prod):
+    """Devuelve el diccionario del producto o None si no existe."""
+    return productos.get(id_prod)
 
 
-# Buscar producto 
-def buscar_producto_dic(productos_dic, id_prod):
-    """Recorre la lista y devuelve el diccionario del producto si encuentra coincidencia.
-    Si no existe, devuelve None."""
+# Modificar producto
+def modificar_producto_dic(productos, proveedores, id_prod, nuevo_nombre=None, nueva_categoria=None,
+                           nuevo_id_proveedor=None, nuevo_precio=None):
+    """Modifica los datos indicados (los que llegan en None no se cambian)."""
 
-    for p in productos_dic:
-
-        if p["id"] == id_prod:
-
-            return p
-
-    return None
-
-
-# Mostrar productos 
-def mostrar_productos_dic(productos_dic):
-    """Muestra todos los productos almacenados en formato de tabla."""
-
-    if len(productos_dic) == 0:
-
-        print("No hay productos cargados.")
-
-        return
-
-    print("\n--- LISTA DE PRODUCTOS ---")
-    print("-" * 100)
-    print("ID             Nombre          Categoria       Proveedor       Stock     Precio")
-    print("-" * 100)
-
-    for p in productos_dic:
-
-        print(f"{p['id']:<15} {p['nombre']:<15} {p['categoria']:<15} {p['proveedor']:<15} {p['stock']:<10} ${p['precio']}")
-
-    print("-" * 100)
-
-
-# Modificar producto 
-def modificar_producto_dic(productos_dic, id_prod, nuevo_nombre, nueva_categoria, nuevo_proveedor, nuevo_precio, categorias_unicas, proveedores_unicos):
-    """Modifica los datos de un producto existente."""
-
-    producto = buscar_producto_dic(productos_dic, id_prod)
+    producto = buscar_producto_dic(productos, id_prod)
 
     if producto is None:
-
-        print("Producto no encontrado.")
-
-        return 0
+        raise ValueError("Producto no encontrado.")
 
     if nuevo_nombre is not None:
-
-        producto["nombre"] = nuevo_nombre
+        if not validaciones.validar_texto(nuevo_nombre):
+            raise ValueError("El nombre es inválido.")
+        producto["nombre"] = validaciones.capitalizar(nuevo_nombre)
 
     if nueva_categoria is not None:
+        if not validaciones.validar_texto(nueva_categoria):
+            raise ValueError("La categoría es inválida.")
+        producto["categoria"] = validaciones.capitalizar(nueva_categoria)
 
-        producto["categoria"] = nueva_categoria
-
-        categorias_unicas.add(nueva_categoria)   
-
-    if nuevo_proveedor is not None:
-
-        producto["proveedor"] = nuevo_proveedor
-
-        proveedores_unicos.add(nuevo_proveedor)
+    if nuevo_id_proveedor is not None:
+        if prov.buscar_proveedor_por_id(proveedores, nuevo_id_proveedor) is None:
+            raise ValueError("No existe un proveedor con ese ID.")
+        producto["id_proveedor"] = nuevo_id_proveedor
 
     if nuevo_precio is not None:
-
+        if nuevo_precio < 0:
+            raise ValueError("El precio no puede ser negativo.")
         producto["precio"] = nuevo_precio
-
-    print("Producto modificado correctamente.")
-
-    return 1
 
 
 # Eliminar producto
-def eliminar_producto_dic(productos_dic, id_prod, ids_unicos):
-    """Elimina un producto por ID."""
+def eliminar_producto_dic(productos, id_prod):
+    if id_prod not in productos:
+        raise ValueError("Producto no encontrado.")
 
-    for i in range(len(productos_dic)):
-
-        if productos_dic[i]["id"] == id_prod:
-
-            productos_dic.pop(i)
-
-            ids_unicos.remove(id_prod)
-
-            print("Producto eliminado.")
-
-            return 1
-
-    print("Producto no encontrado.")
-
-    return 0
+    del productos[id_prod]
 
 
-# Registrar movimiento
-def agregar_movimiento(movimientos, tipo, id_prod, cantidad, productos_dic):
-    """Registra un movimiento en la matriz de movimientos."""
-
-    print("\n=== Registrar movimiento ===")
-
-    producto = buscar_producto_dic(productos_dic, id_prod)
-
-    if producto is None:
-
-        print("El ID ingresado no existe en el inventario.")
-
-        return 0
-
-    # Fecha
-    dia = input("Dia: ").strip()
-    mes = input("Mes: ").strip()
-    anio = input("Año: ").strip()
-
-    if re.match(r"^\d+$", dia) is None or re.match(r"^\d+$", mes) is None or re.match(r"^\d+$", anio) is None:
-
-        print("Fecha inválida (debe contener solo números).")
-
-        return 0
-
-    dia, mes, anio = int(dia), int(mes), int(anio)
-
-    if dia < 1 or dia > 31:
-
-        print("Día inválido (debe estar entre 1 y 31).")
-
-        return 0
-
-    if mes < 1 or mes > 12:
-
-        print("Mes inválido (debe estar entre 1 y 12).")
-
-        return 0
-
-    if anio <= 0:
-
-        print("Año inválido.")
-
-        return 0
-
-    fecha = (dia, mes, anio)
-    nuevo = [tipo, id_prod, cantidad, fecha]
-    movimientos.append(nuevo)
-
-    print("Movimiento registrado.\n")
-
-    return 1
+# Categorías
+def categorias_unicas(productos):
+    """Conjunto de categorías. Se calcula a partir de los productos,
+    así al eliminar uno no quedan categorías que ya no existen."""
+    return {p["categoria"] for p in productos.values()}
 
 
-# Mostrar movimientos
-def mostrar_movimientos(movimientos):
-    """Muestra todos los movimientos registrados."""
+# Movimientos
+def agregar_movimiento(movimientos, tipo, id_prod, cantidad, fecha):
+    """Registra un movimiento en la matriz."""
 
-    if len(movimientos) == 0:
+    if tipo not in TIPOS_MOVIMIENTO:
+        raise ValueError("Tipo de movimiento inválido.")
 
-        print("No hay movimientos registrados.")
+    movimientos.append([tipo, id_prod, cantidad, fecha])
 
-        return
 
-    print("\n--- GESTION DE MOVIMIENTOS ---")
-    print("-" * 80)
-    print("Tipo           ID Producto     Cantidad        Fecha")
-    print("-" * 80)
+def ingreso_stock_dic(productos, movimientos, id_prod, cantidad, fecha):
+    """Suma stock y registra el movimiento. Primero valida todo y después modifica,
+    así no queda el stock cambiado sin su movimiento."""
 
-    for m in movimientos:
-
-        fecha = f"{m[3][0]}/{m[3][1]}/{m[3][2]}"
-
-        print(f"{m[0]:<15} {m[1]:<15} {m[2]:<15} {fecha:<15}")
-
-    print("-" * 80)
-
-# Ingreso de stock
-def ingreso_stock_dic(productos_dic, id_prod, cantidad):
-    """Registra un ingreso de stock."""
-
-    producto = buscar_producto_dic(productos_dic, id_prod)
+    producto = buscar_producto_dic(productos, id_prod)
 
     if producto is None:
-
-        print("Producto no encontrado.")
-
-        return 0
+        raise ValueError("Producto no encontrado.")
 
     if cantidad <= 0:
-
-        print("Cantidad inválida.")
-
-        return 0
+        raise ValueError("La cantidad debe ser mayor a 0.")
 
     producto["stock"] += cantidad
+    agregar_movimiento(movimientos, "Ingreso", id_prod, cantidad, fecha)
 
-    print("Ingreso registrado. Nuevo stock:", producto["stock"])
 
-    return 1
+def movimientos_de_producto(movimientos, id_prod):
+    """Relación producto (A) -> movimientos (B)."""
+    return [m for m in movimientos if m[1] == id_prod]
+
+
+def contar_movimientos_recursivo(movimientos, tipo, i=0):
+    """Cuenta en forma recursiva cuántos movimientos hay de un tipo.
+    Caso base: se recorrió toda la matriz."""
+
+    if i == len(movimientos):
+        return 0
+
+    suma = 1 if movimientos[i][0] == tipo else 0
+
+    return suma + contar_movimientos_recursivo(movimientos, tipo, i + 1)
+
+
+# Mostrar
+def formatear_fecha(fecha):
+    dia, mes, anio = fecha
+    return f"{dia:02d}/{mes:02d}/{anio}"
+
+
+def mostrar_productos_dic(productos, proveedores):
+    """Muestra los productos en formato de tabla."""
+
+    if len(productos) == 0:
+        print("No hay productos cargados.")
+        return
+
+    print("\n--- LISTA DE PRODUCTOS ---")
+    print("-" * 90)
+    print(f"{'ID':<8} {'Nombre':<18} {'Categoria':<15} {'Proveedor':<18} {'Stock':<8} {'Precio':>12}")
+    print("-" * 90)
+
+    for id_prod, p in productos.items():
+        nombre_prov = prov.nombre_proveedor(proveedores, p["id_proveedor"])
+        print(f"{id_prod:<8} {p['nombre'][:18]:<18} {p['categoria'][:15]:<15} "
+              f"{nombre_prov[:18]:<18} {p['stock']:<8} ${p['precio']:>11.2f}")
+
+    print("-" * 90)
+
+
+def mostrar_movimientos(movimientos, productos):
+    """Muestra los movimientos registrados en formato de tabla."""
+
+    if len(movimientos) == 0:
+        print("No hay movimientos registrados.")
+        return
+
+    print("\n--- MOVIMIENTOS ---")
+    print("-" * 65)
+    print(f"{'Tipo':<10} {'ID Prod':<10} {'Producto':<20} {'Cantidad':<10} {'Fecha':<12}")
+    print("-" * 65)
+
+    for m in movimientos:
+        producto = buscar_producto_dic(productos, m[1])
+        nombre = producto["nombre"] if producto else "Eliminado"
+        print(f"{m[0]:<10} {m[1]:<10} {nombre[:20]:<20} {m[2]:<10} {formatear_fecha(m[3]):<12}")
+
+    print("-" * 65)
