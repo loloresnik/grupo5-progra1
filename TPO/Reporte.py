@@ -53,7 +53,7 @@ def ventas_totales(ventas_dic):
 
 
 def ranking_ventas(ventas_dic, productos_dic):
-    """Lista de tuplas (cantidad, nombre) ordenada de mayor a menor."""
+
     lista = [(cantidad, nombre_producto(productos_dic, id_prod)) for id_prod, cantidad in ventas_dic.items()]
     return sorted(lista, reverse=True)
 
