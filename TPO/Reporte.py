@@ -2,12 +2,7 @@ from functools import reduce
 import gestion_productos
 import proveedores
 
-# Las ventas se guardan en un diccionario: {id_producto: cantidad_vendida}
 
-
-# ============================
-# VENTAS
-# ============================
 
 def registrar_venta(ventas_dic, productos_dic, movimientos, id_prod, cantidad, fecha):
     """Descuenta stock, acumula la venta y registra un movimiento de Egreso."""
@@ -63,12 +58,11 @@ def ranking_ventas(ventas_dic, productos_dic):
     return sorted(lista, reverse=True)
 
 
-# Top 3 más vendidos
 def top_mas_vendidos(ventas_dic, productos_dic):
     return [nombre for cantidad, nombre in ranking_ventas(ventas_dic, productos_dic)[:3]]
 
 
-# Top 3 menos vendidos
+
 def menos_vendidos(ventas_dic, productos_dic):
     return [nombre for cantidad, nombre in ranking_ventas(ventas_dic, productos_dic)[::-1][:3]]
 
@@ -84,9 +78,6 @@ def recaudacion_total(ventas_dic, productos_dic):
     return total
 
 
-# ============================
-# MÁXIMOS Y MÍNIMOS (RECURSIVO)
-# ============================
 
 def extremo_recursivo(lista, clave, buscar_mayor):
     """Devuelve el elemento con el mayor (o menor) valor en la clave indicada.
@@ -127,9 +118,6 @@ def producto_menor_stock(productos_dic):
     return extremo_recursivo(list(productos_dic.values()), "stock", False)
 
 
-# ============================
-# VALOR DEL INVENTARIO
-# ============================
 
 def valor_total_stock(productos_dic):
     total = 0
@@ -154,9 +142,7 @@ def valor_total_recursivo(lista_productos):
     return primero["precio"] * primero["stock"] + valor_total_recursivo(lista_productos[1:])
 
 
-# ============================
-# ESTADÍSTICAS POR CATEGORÍA Y PROVEEDOR
-# ============================
+
 
 def valor_por_categoria(productos_dic):
     categorias = {}
@@ -258,9 +244,7 @@ def buscar_por_categoria(productos_dic, categoria):
     return resultado
 
 
-# ============================
-# LAMBDA: MAP Y FILTER
-# ============================
+
 
 def precios_con_iva(productos_dic):
     """Lista de tuplas (nombre, precio con IVA)."""
@@ -271,9 +255,7 @@ def productos_sin_stock(productos_dic):
     return dict(filter(lambda item: item[1]["stock"] == 0, productos_dic.items()))
 
 
-# ============================
-# OPERACIONES ENTRE CONJUNTOS
-# ============================
+
 
 def productos_vendidos_sin_stock(ventas_dic, productos_dic):
     """Intersección: productos que se vendieron y hoy no tienen stock (hay que reponer)."""
@@ -291,9 +273,7 @@ def categorias_sin_ventas(ventas_dic, productos_dic):
     return gestion_productos.categorias_unicas(productos_dic) - categorias_vendidas
 
 
-# ============================
-# RESUMEN ESTADÍSTICO
-# ============================
+
 
 def resumen_estadistico(productos_dic):
     """Devuelve un diccionario con el resumen del inventario.
@@ -354,7 +334,7 @@ def mostrar_tabla(titulo, datos, columna, formato):
     print("-" * 40)
 
     for clave, valor in datos.items():
-        # Código corto de 3 letras tomado con rebanadas
+        
         print(f"{clave[:3].upper():<5}{clave[:20]:<20} {formato.format(valor):>14}")
 
     print("-" * 40)
