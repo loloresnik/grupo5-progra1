@@ -1,6 +1,6 @@
 from functools import reduce
 import gestion_productos
-import proveedores as prov
+import proveedores
 
 # Las ventas se guardan en un diccionario: {id_producto: cantidad_vendida}
 
@@ -30,7 +30,11 @@ def registrar_venta(ventas_dic, productos_dic, movimientos, id_prod, cantidad, f
 
 def nombre_producto(productos_dic, id_prod):
     producto = gestion_productos.buscar_producto_dic(productos_dic, id_prod)
-    return producto["nombre"] if producto else "Eliminado"
+
+    if producto is None:
+        return "Eliminado"
+
+    return producto["nombre"]
 
 
 def mostrar_ventas(ventas_dic, productos_dic):
@@ -84,7 +88,7 @@ def recaudacion_total(ventas_dic, productos_dic):
 # MÁXIMOS Y MÍNIMOS (RECURSIVO)
 # ============================
 
-def extremo_recursivo(lista, clave, buscar_mayor=True):
+def extremo_recursivo(lista, clave, buscar_mayor):
     """Devuelve el elemento con el mayor (o menor) valor en la clave indicada.
     Caso base: lista con un solo elemento.
     Caso recursivo: se compara el primero con el extremo del resto de la lista."""
@@ -98,9 +102,13 @@ def extremo_recursivo(lista, clave, buscar_mayor=True):
     extremo_resto = extremo_recursivo(lista[1:], clave, buscar_mayor)
 
     if buscar_mayor:
-        return lista[0] if lista[0][clave] >= extremo_resto[clave] else extremo_resto
+        if lista[0][clave] >= extremo_resto[clave]:
+            return lista[0]
+        return extremo_resto
 
-    return lista[0] if lista[0][clave] <= extremo_resto[clave] else extremo_resto
+    if lista[0][clave] <= extremo_resto[clave]:
+        return lista[0]
+    return extremo_resto
 
 
 def producto_mas_caro(productos_dic):
@@ -161,13 +169,17 @@ def valor_por_categoria(productos_dic):
 
 def porcentaje_valor_por_categoria(productos_dic):
     total = valor_total_stock(productos_dic)
+    porcentajes = {}
 
     if total == 0:
-        return {}
+        return porcentajes
 
     valores = valor_por_categoria(productos_dic)
 
-    return {cat: round(valor / total * 100, 2) for cat, valor in valores.items()}
+    for cat, valor in valores.items():
+        porcentajes[cat] = valor / total * 100
+
+    return porcentajes
 
 
 def total_registros(productos_dic):
@@ -184,12 +196,15 @@ def conteo_por_categoria(productos_dic):
     return conteo
 
 
-def conteo_por_proveedor(productos_dic, proveedores):
+def conteo_por_proveedor(productos_dic, lista_prov):
     """Cantidad de productos de cada proveedor (los que no tienen productos cuentan 0)."""
-    conteo = {fila[1]: 0 for fila in proveedores}
+    conteo = {}
+
+    for fila in lista_prov:
+        conteo[fila[1]] = 0
 
     for p in productos_dic.values():
-        nombre = prov.nombre_proveedor(proveedores, p["id_proveedor"])
+        nombre = proveedores.nombre_proveedor(lista_prov, p["id_proveedor"])
         conteo[nombre] = conteo.get(nombre, 0) + 1
 
     return conteo
@@ -198,11 +213,15 @@ def conteo_por_proveedor(productos_dic, proveedores):
 def porcentaje_cantidad_por_categoria(productos_dic):
     """Porcentaje de productos de cada categoría sobre el total."""
     total = total_registros(productos_dic)
+    porcentajes = {}
 
     if total == 0:
-        return {}
+        return porcentajes
 
-    return {cat: round(cant / total * 100, 2) for cat, cant in conteo_por_categoria(productos_dic).items()}
+    for cat, cant in conteo_por_categoria(productos_dic).items():
+        porcentajes[cat] = cant / total * 100
+
+    return porcentajes
 
 
 def promedio_precio(productos_dic):
@@ -220,13 +239,23 @@ def promedio_precio_por_categoria(productos_dic):
         sumas[p["categoria"]] = sumas.get(p["categoria"], 0) + p["precio"]
 
     conteo = conteo_por_categoria(productos_dic)
+    promedios = {}
 
-    return {cat: round(sumas[cat] / conteo[cat], 2) for cat in sumas}
+    for cat in sumas:
+        promedios[cat] = sumas[cat] / conteo[cat]
+
+    return promedios
 
 
 def buscar_por_categoria(productos_dic, categoria):
     categoria = categoria.strip().lower()
-    return {id_prod: p for id_prod, p in productos_dic.items() if p["categoria"].lower() == categoria}
+    resultado = {}
+
+    for id_prod, p in productos_dic.items():
+        if p["categoria"].lower() == categoria:
+            resultado[id_prod] = p
+
+    return resultado
 
 
 # ============================
@@ -235,7 +264,7 @@ def buscar_por_categoria(productos_dic, categoria):
 
 def precios_con_iva(productos_dic):
     """Lista de tuplas (nombre, precio con IVA)."""
-    return list(map(lambda p: (p["nombre"], round(p["precio"] * 1.21, 2)), productos_dic.values()))
+    return list(map(lambda p: (p["nombre"], p["precio"] * 1.21), productos_dic.values()))
 
 
 def productos_sin_stock(productos_dic):
@@ -248,12 +277,17 @@ def productos_sin_stock(productos_dic):
 
 def productos_vendidos_sin_stock(ventas_dic, productos_dic):
     """Intersección: productos que se vendieron y hoy no tienen stock (hay que reponer)."""
-    return set(ventas_dic) & set(productos_sin_stock(productos_dic))
+    return set(ventas_dic.keys()) & set(productos_sin_stock(productos_dic).keys())
 
 
 def categorias_sin_ventas(ventas_dic, productos_dic):
     """Diferencia: categorías que no tuvieron ninguna venta."""
-    categorias_vendidas = {productos_dic[i]["categoria"] for i in ventas_dic if i in productos_dic}
+    categorias_vendidas = set()
+
+    for id_prod in ventas_dic:
+        if id_prod in productos_dic:
+            categorias_vendidas.add(productos_dic[id_prod]["categoria"])
+
     return gestion_productos.categorias_unicas(productos_dic) - categorias_vendidas
 
 
@@ -263,20 +297,21 @@ def categorias_sin_ventas(ventas_dic, productos_dic):
 
 def resumen_estadistico(productos_dic):
     """Devuelve un diccionario con el resumen del inventario.
-    El rango de precios se guarda en una tupla (minimo, maximo, promedio) porque no se modifica."""
+    Los precios se guardan en una tupla (minimo, maximo, promedio) porque no se modifican."""
 
     if len(productos_dic) == 0:
         return {}
 
     precios = [p["precio"] for p in productos_dic.values()]
-    minimo, maximo = min(precios), max(precios)
+    minimo = min(precios)
+    maximo = max(precios)
 
     return {
         "productos": total_registros(productos_dic),
         "categorias": len(gestion_productos.categorias_unicas(productos_dic)),
         "unidades": sum(p["stock"] for p in productos_dic.values()),
         "valor_total": valor_total_stock(productos_dic),
-        "precios": (minimo, maximo, round(promedio_precio(productos_dic), 2)),
+        "precios": (minimo, maximo, promedio_precio(productos_dic)),
         "rango_precios": maximo - minimo,
         "sin_stock": len(productos_sin_stock(productos_dic))
     }
@@ -305,8 +340,9 @@ def mostrar_resumen(productos_dic):
     print("-" * 40)
 
 
-def mostrar_tabla(titulo, datos, columna, formato="{}"):
-    """Imprime un diccionario {clave: valor} como tabla de dos columnas."""
+def mostrar_tabla(titulo, datos, columna, formato):
+    """Imprime un diccionario {nombre: valor} como tabla de dos columnas.
+    formato es un molde de texto para el valor, por ejemplo "{}", "${:.2f}" o "{:.2f}%"."""
 
     if len(datos) == 0:
         print("No hay datos.")

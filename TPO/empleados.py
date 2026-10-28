@@ -1,8 +1,6 @@
-import validaciones
+import proveedores
 
 # Los usuarios se guardan en un diccionario: {usuario: {"clave": ..., "tipo": ...}}
-
-ROLES = ("admin", "usuario")
 
 
 def alta_usuario(usuarios, nombre, clave, tipo="usuario"):
@@ -13,13 +11,14 @@ def alta_usuario(usuarios, nombre, clave, tipo="usuario"):
     if nombre in usuarios:
         raise ValueError("El usuario ya existe.")
 
-    if not validaciones.validar_texto(nombre):
+    if not proveedores.validar_nombre(nombre):
         raise ValueError("El nombre de usuario es inválido.")
 
     if len(clave) < 4:
         raise ValueError("La contraseña debe tener al menos 4 caracteres.")
 
-    if tipo not in ROLES:
+    # Tupla con los roles válidos
+    if tipo not in ("admin", "usuario"):
         raise ValueError("Rol inválido.")
 
     usuarios[nombre] = {"clave": clave, "tipo": tipo}

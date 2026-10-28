@@ -1,5 +1,4 @@
-import validaciones
-import proveedores as prov
+import proveedores
 
 # Los productos se guardan en un diccionario cuya clave es el ID:
 # productos = {1001: {"nombre": "Teclado", "categoria": "Perifericos",
@@ -7,12 +6,18 @@ import proveedores as prov
 #
 # Los movimientos se guardan en una matriz (lista de listas):
 # movimiento = [tipo, id_producto, cantidad, (dia, mes, anio)]
+#
+# "lista_prov" es la matriz de proveedores (se llama así para no confundirla con el módulo proveedores).
 
-TIPOS_MOVIMIENTO = ("Ingreso", "Egreso")
+
+def capitalizar(texto):
+    """Pone en mayúscula solo la primera letra usando rebanadas: 'ssd 1TB' -> 'Ssd 1TB'"""
+    texto = texto.strip()
+    return texto[:1].upper() + texto[1:]
 
 
 # Agregar producto
-def alta_producto(productos, proveedores, id_prod, nombre, categoria, id_proveedor, stock, precio):
+def alta_producto(productos, lista_prov, id_prod, nombre, categoria, id_proveedor, stock, precio):
     """Registra un nuevo producto.
     Lanza ValueError si el ID está repetido, el proveedor no existe o algún dato es inválido."""
 
@@ -22,21 +27,21 @@ def alta_producto(productos, proveedores, id_prod, nombre, categoria, id_proveed
     if id_prod <= 0:
         raise ValueError("El ID debe ser mayor a 0.")
 
-    if not validaciones.validar_texto(nombre):
+    if not proveedores.validar_nombre(nombre.strip()):
         raise ValueError("El nombre es inválido.")
 
-    if not validaciones.validar_texto(categoria):
+    if not proveedores.validar_nombre(categoria.strip()):
         raise ValueError("La categoría es inválida.")
 
-    if prov.buscar_proveedor_por_id(proveedores, id_proveedor) is None:
+    if proveedores.buscar_proveedor_por_id(lista_prov, id_proveedor) is None:
         raise ValueError("No existe un proveedor con ese ID.")
 
     if stock < 0 or precio < 0:
         raise ValueError("El stock y el precio no pueden ser negativos.")
 
     productos[id_prod] = {
-        "nombre": validaciones.capitalizar(nombre),
-        "categoria": validaciones.capitalizar(categoria),
+        "nombre": capitalizar(nombre),
+        "categoria": capitalizar(categoria),
         "id_proveedor": id_proveedor,
         "stock": stock,
         "precio": precio
@@ -50,8 +55,8 @@ def buscar_producto_dic(productos, id_prod):
 
 
 # Modificar producto
-def modificar_producto_dic(productos, proveedores, id_prod, nuevo_nombre=None, nueva_categoria=None,
-                           nuevo_id_proveedor=None, nuevo_precio=None):
+def modificar_producto_dic(productos, lista_prov, id_prod, nuevo_nombre, nueva_categoria,
+                           nuevo_id_proveedor, nuevo_precio):
     """Modifica los datos indicados (los que llegan en None no se cambian)."""
 
     producto = buscar_producto_dic(productos, id_prod)
@@ -60,17 +65,17 @@ def modificar_producto_dic(productos, proveedores, id_prod, nuevo_nombre=None, n
         raise ValueError("Producto no encontrado.")
 
     if nuevo_nombre is not None:
-        if not validaciones.validar_texto(nuevo_nombre):
+        if not proveedores.validar_nombre(nuevo_nombre.strip()):
             raise ValueError("El nombre es inválido.")
-        producto["nombre"] = validaciones.capitalizar(nuevo_nombre)
+        producto["nombre"] = capitalizar(nuevo_nombre)
 
     if nueva_categoria is not None:
-        if not validaciones.validar_texto(nueva_categoria):
+        if not proveedores.validar_nombre(nueva_categoria.strip()):
             raise ValueError("La categoría es inválida.")
-        producto["categoria"] = validaciones.capitalizar(nueva_categoria)
+        producto["categoria"] = capitalizar(nueva_categoria)
 
     if nuevo_id_proveedor is not None:
-        if prov.buscar_proveedor_por_id(proveedores, nuevo_id_proveedor) is None:
+        if proveedores.buscar_proveedor_por_id(lista_prov, nuevo_id_proveedor) is None:
             raise ValueError("No existe un proveedor con ese ID.")
         producto["id_proveedor"] = nuevo_id_proveedor
 
@@ -92,14 +97,19 @@ def eliminar_producto_dic(productos, id_prod):
 def categorias_unicas(productos):
     """Conjunto de categorías. Se calcula a partir de los productos,
     así al eliminar uno no quedan categorías que ya no existen."""
-    return {p["categoria"] for p in productos.values()}
+    categorias = set()
+
+    for p in productos.values():
+        categorias.add(p["categoria"])
+
+    return categorias
 
 
 # Movimientos
 def agregar_movimiento(movimientos, tipo, id_prod, cantidad, fecha):
     """Registra un movimiento en la matriz."""
 
-    if tipo not in TIPOS_MOVIMIENTO:
+    if tipo not in ("Ingreso", "Egreso"):
         raise ValueError("Tipo de movimiento inválido.")
 
     movimientos.append([tipo, id_prod, cantidad, fecha])
@@ -133,18 +143,15 @@ def contar_movimientos_recursivo(movimientos, tipo, i=0):
     if i == len(movimientos):
         return 0
 
-    suma = 1 if movimientos[i][0] == tipo else 0
+    suma = 0
+    if movimientos[i][0] == tipo:
+        suma = 1
 
     return suma + contar_movimientos_recursivo(movimientos, tipo, i + 1)
 
 
 # Mostrar
-def formatear_fecha(fecha):
-    dia, mes, anio = fecha
-    return f"{dia:02d}/{mes:02d}/{anio}"
-
-
-def mostrar_productos_dic(productos, proveedores):
+def mostrar_productos_dic(productos, lista_prov):
     """Muestra los productos en formato de tabla."""
 
     if len(productos) == 0:
@@ -157,7 +164,7 @@ def mostrar_productos_dic(productos, proveedores):
     print("-" * 90)
 
     for id_prod, p in productos.items():
-        nombre_prov = prov.nombre_proveedor(proveedores, p["id_proveedor"])
+        nombre_prov = proveedores.nombre_proveedor(lista_prov, p["id_proveedor"])
         print(f"{id_prod:<8} {p['nombre'][:18]:<18} {p['categoria'][:15]:<15} "
               f"{nombre_prov[:18]:<18} {p['stock']:<8} ${p['precio']:>11.2f}")
 
@@ -178,7 +185,14 @@ def mostrar_movimientos(movimientos, productos):
 
     for m in movimientos:
         producto = buscar_producto_dic(productos, m[1])
-        nombre = producto["nombre"] if producto else "Eliminado"
-        print(f"{m[0]:<10} {m[1]:<10} {nombre[:20]:<20} {m[2]:<10} {formatear_fecha(m[3]):<12}")
+
+        if producto is None:
+            nombre = "Eliminado"
+        else:
+            nombre = producto["nombre"]
+
+        dia, mes, anio = m[3]
+        fecha = f"{dia}/{mes}/{anio}"
+        print(f"{m[0]:<10} {m[1]:<10} {nombre[:20]:<20} {m[2]:<10} {fecha:<12}")
 
     print("-" * 65)

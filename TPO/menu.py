@@ -1,16 +1,13 @@
-import unittest
+import re
 
 import gestion_productos
 import proveedores
 import Reporte
 import empleados
 import archivos
-import validaciones as val
 
 # "datos" es un diccionario con toda la información del sistema:
 # {"productos": {...}, "proveedores": [[...]], "movimientos": [[...]], "ventas": {...}, "usuarios": {...}}
-
-MAX_INTENTOS = 3
 
 
 def guardar(datos):
@@ -19,13 +16,118 @@ def guardar(datos):
 
 
 # ============================
+# INGRESO DE DATOS CON EXCEPCIONES
+# ============================
+
+def pedir_entero(mensaje, minimo, opcional):
+    """Pide un entero hasta que sea válido (sin letras, no vacío y no menor al mínimo).
+    Si opcional es True y se deja vacío, devuelve None."""
+
+    while True:
+        texto = input(mensaje).strip()
+
+        if opcional and texto == "":
+            return None
+
+        if texto == "":
+            print("Error: el dato no puede estar vacío.")
+            continue
+
+        try:
+            numero = int(texto)
+        except ValueError:
+            print("Error: debe ingresar un número entero (sin letras).")
+            continue
+
+        if numero < minimo:
+            print(f"Error: el valor no puede ser menor a {minimo}.")
+            continue
+
+        return numero
+
+
+def pedir_precio(mensaje, opcional):
+    """Pide un número con decimales mayor o igual a 0."""
+
+    while True:
+        texto = input(mensaje).strip().replace(",", ".")
+
+        if opcional and texto == "":
+            return None
+
+        if texto == "":
+            print("Error: el dato no puede estar vacío.")
+            continue
+
+        try:
+            precio = float(texto)
+        except ValueError:
+            print("Error: debe ingresar un número (sin letras).")
+            continue
+
+        if precio < 0:
+            print("Error: el precio no puede ser negativo.")
+            continue
+
+        return precio
+
+
+def pedir_texto(mensaje, opcional):
+    """Pide un texto que no esté vacío (si es opcional, vacío devuelve None)."""
+
+    while True:
+        texto = input(mensaje).strip()
+
+        if texto != "":
+            return texto
+
+        if opcional:
+            return None
+
+        print("Error: el dato no puede estar vacío.")
+
+
+def pedir_fecha():
+    """Pide una fecha dd/mm/aaaa, la valida y la devuelve como tupla (dia, mes, anio)."""
+
+    while True:
+        texto = input("Fecha (dd/mm/aaaa): ").strip()
+
+        try:
+            if re.match(r"^\d{1,2}/\d{1,2}/\d{4}$", texto) is None:
+                raise ValueError("La fecha debe tener el formato dd/mm/aaaa.")
+
+            dia, mes, anio = texto.split("/")
+            dia, mes, anio = int(dia), int(mes), int(anio)
+
+            if mes < 1 or mes > 12:
+                raise ValueError("Mes inválido (debe estar entre 1 y 12).")
+
+            # Días de cada mes (tupla: no se modifica)
+            dias_por_mes = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+            dias_del_mes = dias_por_mes[mes - 1]
+
+            # Año bisiesto: febrero tiene 29 días
+            if mes == 2 and anio % 4 == 0 and (anio % 100 != 0 or anio % 400 == 0):
+                dias_del_mes = 29
+
+            if dia < 1 or dia > dias_del_mes:
+                raise ValueError(f"Día inválido (el mes {mes} tiene {dias_del_mes} días).")
+
+            return (dia, mes, anio)
+
+        except ValueError as error:
+            print("Error:", error)
+
+
+# ============================
 # LOGIN
 # ============================
 
 def iniciar_sesion(usuarios):
-    """Devuelve la tupla (usuario, rol) o None si se agotan los intentos."""
+    """Devuelve la tupla (usuario, rol) o None si se equivoca 3 veces."""
 
-    for intento in range(1, MAX_INTENTOS + 1):
+    for intento in range(1, 4):
         usuario = input("Ingrese usuario: ").strip()
         clave = input("Ingrese contraseña: ")
 
@@ -33,7 +135,7 @@ def iniciar_sesion(usuarios):
             print(f"\nBienvenido/a, {usuario}.")
             return (usuario, usuarios[usuario]["tipo"])
 
-        print(f"Usuario o contraseña incorrectos. Intentos restantes: {MAX_INTENTOS - intento}")
+        print(f"Usuario o contraseña incorrectos. Intentos restantes: {3 - intento}")
 
     print("Se agotaron los intentos.")
     return None
@@ -81,18 +183,18 @@ def menu_productos(datos):
                     continue
 
                 print("\n=== AGREGAR PRODUCTO ===")
-                id_prod = val.pedir_entero("ID del producto: ", minimo=1)
+                id_prod = pedir_entero("ID del producto: ", 1, False)
 
                 if id_prod in productos:
                     print("Error: el ID ya existe.")
                     continue
 
-                nombre = val.pedir_texto("Nombre: ", error="Solo letras, números, espacios, puntos o guiones.")
-                categoria = val.pedir_texto("Categoría: ", error="Solo letras, números, espacios, puntos o guiones.")
+                nombre = pedir_texto("Nombre: ", False)
+                categoria = pedir_texto("Categoría: ", False)
                 proveedores.mostrar_proveedores(lista_prov)
-                id_proveedor = val.pedir_entero("ID del proveedor: ", minimo=1)
-                stock = val.pedir_entero("Stock inicial: ")
-                precio = val.pedir_float("Precio: ")
+                id_proveedor = pedir_entero("ID del proveedor: ", 1, False)
+                stock = pedir_entero("Stock inicial: ", 0, False)
+                precio = pedir_precio("Precio: ", False)
 
                 gestion_productos.alta_producto(productos, lista_prov, id_prod, nombre, categoria,
                                                 id_proveedor, stock, precio)
@@ -103,21 +205,21 @@ def menu_productos(datos):
                 gestion_productos.mostrar_productos_dic(productos, lista_prov)
 
             elif opcion == "3":
-                id_prod = val.pedir_entero("ID del producto: ", minimo=1)
+                id_prod = pedir_entero("ID del producto: ", 1, False)
                 mostrar_detalle_producto(datos, id_prod)
 
             elif opcion == "4":
-                id_prod = val.pedir_entero("ID del producto a modificar: ", minimo=1)
+                id_prod = pedir_entero("ID del producto a modificar: ", 1, False)
 
                 if gestion_productos.buscar_producto_dic(productos, id_prod) is None:
                     print("Producto no encontrado.")
                     continue
 
                 print("\nDeje vacio un campo si no desea modificarlo.")
-                nuevo_nombre = val.pedir_texto("Nuevo nombre: ", error="Nombre inválido.", opcional=True)
-                nueva_categoria = val.pedir_texto("Nueva categoria: ", error="Categoría inválida.", opcional=True)
-                nuevo_proveedor = val.pedir_entero("Nuevo ID de proveedor: ", minimo=1, opcional=True)
-                nuevo_precio = val.pedir_float("Nuevo precio: ", opcional=True)
+                nuevo_nombre = pedir_texto("Nuevo nombre: ", True)
+                nueva_categoria = pedir_texto("Nueva categoria: ", True)
+                nuevo_proveedor = pedir_entero("Nuevo ID de proveedor: ", 1, True)
+                nuevo_precio = pedir_precio("Nuevo precio: ", True)
 
                 gestion_productos.modificar_producto_dic(productos, lista_prov, id_prod, nuevo_nombre,
                                                          nueva_categoria, nuevo_proveedor, nuevo_precio)
@@ -125,7 +227,7 @@ def menu_productos(datos):
                 print("Producto modificado correctamente.")
 
             elif opcion == "5":
-                id_prod = val.pedir_entero("ID del producto a eliminar: ", minimo=1)
+                id_prod = pedir_entero("ID del producto a eliminar: ", 1, False)
                 gestion_productos.eliminar_producto_dic(productos, id_prod)
                 guardar(datos)
                 print("Producto eliminado.")
@@ -160,14 +262,14 @@ def menu_movimientos(datos):
 
         try:
             if opcion == "1":
-                id_prod = val.pedir_entero("ID del producto: ", minimo=1)
+                id_prod = pedir_entero("ID del producto: ", 1, False)
 
                 if gestion_productos.buscar_producto_dic(productos, id_prod) is None:
                     print("Producto no encontrado.")
                     continue
 
-                cantidad = val.pedir_entero("Cantidad: ", minimo=1)
-                fecha = val.pedir_fecha()
+                cantidad = pedir_entero("Cantidad: ", 1, False)
+                fecha = pedir_fecha()
 
                 gestion_productos.ingreso_stock_dic(productos, movimientos, id_prod, cantidad, fecha)
                 guardar(datos)
@@ -177,12 +279,12 @@ def menu_movimientos(datos):
                 gestion_productos.mostrar_movimientos(movimientos, productos)
 
             elif opcion == "3":
-                id_prod = val.pedir_entero("ID del producto: ", minimo=1)
+                id_prod = pedir_entero("ID del producto: ", 1, False)
                 resultado = gestion_productos.movimientos_de_producto(movimientos, id_prod)
                 gestion_productos.mostrar_movimientos(resultado, productos)
 
             elif opcion == "4":
-                for tipo in gestion_productos.TIPOS_MOVIMIENTO:
+                for tipo in ("Ingreso", "Egreso"):
                     print(f"{tipo}: {gestion_productos.contar_movimientos_recursivo(movimientos, tipo)}")
 
             elif opcion == "0":
@@ -219,16 +321,15 @@ def menu_proveedores(datos):
 
         try:
             if opcion == "1":
-                id_prov = val.pedir_entero("ID del proveedor: ", minimo=1)
+                id_prov = pedir_entero("ID del proveedor: ", 1, False)
 
                 if proveedores.buscar_proveedor_por_id(lista_prov, id_prov) is not None:
                     print("Error: ya existe un proveedor con ese ID.")
                     continue
 
-                nombre = val.pedir_texto("Nombre: ", error="Nombre inválido.")
-                telefono = val.pedir_texto("Teléfono (ej: 11-45678901): ", val.validar_telefono,
-                                           "Teléfono inválido.")
-                mail = val.pedir_texto("Mail: ", val.validar_mail, "Mail inválido (ej: ventas@empresa.com).")
+                nombre = pedir_texto("Nombre: ", False)
+                telefono = pedir_texto("Teléfono (ej: 11-45678901): ", False)
+                mail = pedir_texto("Mail: ", False)
 
                 proveedores.agregar_proveedor(lista_prov, id_prov, nombre, telefono, mail)
                 guardar(datos)
@@ -243,24 +344,23 @@ def menu_proveedores(datos):
                 proveedores.mostrar_proveedores(resultado)
 
             elif opcion == "4":
-                id_prov = val.pedir_entero("ID del proveedor a modificar: ", minimo=1)
+                id_prov = pedir_entero("ID del proveedor a modificar: ", 1, False)
 
                 if proveedores.buscar_proveedor_por_id(lista_prov, id_prov) is None:
                     print("Proveedor no encontrado.")
                     continue
 
                 print("\nDeje vacio un campo si no desea modificarlo.")
-                nuevo_nombre = val.pedir_texto("Nuevo nombre: ", error="Nombre inválido.", opcional=True)
-                nuevo_telefono = val.pedir_texto("Nuevo teléfono: ", val.validar_telefono,
-                                                 "Teléfono inválido.", opcional=True)
-                nuevo_mail = val.pedir_texto("Nuevo mail: ", val.validar_mail, "Mail inválido.", opcional=True)
+                nuevo_nombre = pedir_texto("Nuevo nombre: ", True)
+                nuevo_telefono = pedir_texto("Nuevo teléfono: ", True)
+                nuevo_mail = pedir_texto("Nuevo mail: ", True)
 
                 proveedores.modificar_proveedor(lista_prov, id_prov, nuevo_nombre, nuevo_telefono, nuevo_mail)
                 guardar(datos)
                 print("Proveedor modificado correctamente.")
 
             elif opcion == "5":
-                id_prov = val.pedir_entero("ID del proveedor a eliminar: ", minimo=1)
+                id_prov = pedir_entero("ID del proveedor a eliminar: ", 1, False)
                 proveedores.eliminar_proveedor(lista_prov, id_prov, productos)
                 guardar(datos)
                 print("Proveedor eliminado.")
@@ -271,7 +371,7 @@ def menu_proveedores(datos):
                 gestion_productos.mostrar_productos_dic(resultado, lista_prov)
 
             elif opcion == "7":
-                id_prov = val.pedir_entero("ID del proveedor: ", minimo=1)
+                id_prov = pedir_entero("ID del proveedor: ", 1, False)
                 print("Stock total del proveedor:", proveedores.stock_por_proveedor(productos, id_prov))
 
             elif opcion == "8":
@@ -354,14 +454,14 @@ def menu_ventas(datos):
 
         try:
             if opcion == "1":
-                id_prod = val.pedir_entero("ID del producto: ", minimo=1)
+                id_prod = pedir_entero("ID del producto: ", 1, False)
 
                 if gestion_productos.buscar_producto_dic(productos, id_prod) is None:
                     print("Producto no encontrado.")
                     continue
 
-                cantidad = val.pedir_entero("Cantidad: ", minimo=1)
-                fecha = val.pedir_fecha()
+                cantidad = pedir_entero("Cantidad: ", 1, False)
+                fecha = pedir_fecha()
 
                 Reporte.registrar_venta(ventas, productos, datos["movimientos"], id_prod, cantidad, fecha)
                 guardar(datos)
@@ -444,21 +544,22 @@ def menu_estadisticas(datos):
 
         elif opcion == "3":
             print("Total de productos:", Reporte.total_registros(productos))
-            Reporte.mostrar_tabla("PRODUCTOS POR CATEGORIA", Reporte.conteo_por_categoria(productos), "Cantidad")
+            Reporte.mostrar_tabla("PRODUCTOS POR CATEGORIA", Reporte.conteo_por_categoria(productos),
+                                  "Cantidad", "{}")
 
         elif opcion == "4":
             Reporte.mostrar_tabla("PRODUCTOS POR PROVEEDOR",
-                                  Reporte.conteo_por_proveedor(productos, datos["proveedores"]), "Cantidad")
+                                  Reporte.conteo_por_proveedor(productos, datos["proveedores"]), "Cantidad", "{}")
 
         elif opcion == "5":
             Reporte.mostrar_tabla("% DE PRODUCTOS POR CATEGORIA",
-                                  Reporte.porcentaje_cantidad_por_categoria(productos), "Porcentaje", "{}%")
+                                  Reporte.porcentaje_cantidad_por_categoria(productos), "Porcentaje", "{:.2f}%")
 
         elif opcion == "6":
             Reporte.mostrar_tabla("VALOR POR CATEGORIA", Reporte.valor_por_categoria(productos),
                                   "Valor", "${:.2f}")
             Reporte.mostrar_tabla("% DEL VALOR POR CATEGORIA", Reporte.porcentaje_valor_por_categoria(productos),
-                                  "Porcentaje", "{}%")
+                                  "Porcentaje", "{:.2f}%")
 
         elif opcion == "7":
             mostrar_producto_simple("Mas caro", Reporte.producto_mas_caro(productos), "precio")
@@ -506,7 +607,7 @@ def menu_empleados(datos):
 
         try:
             if opcion == "1":
-                nombre = val.pedir_texto("Nombre de usuario: ", error="Nombre inválido.")
+                nombre = pedir_texto("Nombre de usuario: ", False)
                 clave = input("Contraseña (mínimo 4 caracteres): ")
                 empleados.alta_usuario(usuarios, nombre, clave)
                 guardar(datos)
@@ -539,20 +640,13 @@ def menu_empleados(datos):
 
 
 # ============================
-# ARCHIVOS Y PRUEBAS
+# ARCHIVOS
 # ============================
 
 def leer_archivos(datos):
     """Vuelve a cargar los datos desde los archivos (se reemplaza lo que hay en memoria)."""
     datos.update(archivos.cargar_datos())
     print("Datos leídos desde los archivos.")
-
-
-def ejecutar_pruebas():
-    import test_inventario
-
-    pruebas = unittest.TestLoader().loadTestsFromModule(test_inventario)
-    unittest.TextTestRunner(verbosity=2).run(pruebas)
 
 
 # ============================
@@ -562,7 +656,10 @@ def ejecutar_pruebas():
 def menu_principal(datos, rol):
     while True:
         print("\n==============================")
-        print("      MENU ADMINISTRADOR" if rol == "admin" else "         MENU USUARIO")
+        if rol == "admin":
+            print("      MENU ADMINISTRADOR")
+        else:
+            print("         MENU USUARIO")
         print("==============================")
 
         print("1. Gestion de productos")
@@ -573,9 +670,8 @@ def menu_principal(datos, rol):
         print("6. Estadisticas")
         print("7. Guardar datos en archivos")
         print("8. Leer datos desde archivos")
-        print("9. Ejecutar pruebas")
         if rol == "admin":
-            print("10. Empleados")
+            print("9. Empleados")
         print("0. Cerrar sesion")
 
         opcion = input("Seleccione una opcion: ").strip()
@@ -605,10 +701,7 @@ def menu_principal(datos, rol):
         elif opcion == "8":
             leer_archivos(datos)
 
-        elif opcion == "9":
-            ejecutar_pruebas()
-
-        elif opcion == "10" and rol == "admin":
+        elif opcion == "9" and rol == "admin":
             menu_empleados(datos)
 
         elif opcion == "0":
