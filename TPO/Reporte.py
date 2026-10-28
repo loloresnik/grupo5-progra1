@@ -5,7 +5,7 @@ import proveedores
 
 
 def registrar_venta(ventas_dic, productos_dic, movimientos, id_prod, cantidad, fecha):
-    """Descuenta stock, acumula la venta y registra un movimiento de Egreso."""
+  
 
     producto = gestion_productos.buscar_producto_dic(productos_dic, id_prod)
 
@@ -80,9 +80,6 @@ def recaudacion_total(ventas_dic, productos_dic):
 
 
 def extremo_recursivo(lista, clave, buscar_mayor):
-    """Devuelve el elemento con el mayor (o menor) valor en la clave indicada.
-    Caso base: lista con un solo elemento.
-    Caso recursivo: se compara el primero con el extremo del resto de la lista."""
 
     if len(lista) == 0:
         return None
@@ -131,8 +128,7 @@ def valor_total_reduce(productos_dic):
 
 
 def valor_total_recursivo(lista_productos):
-    """Suma precio * stock de forma recursiva.
-    Caso base: lista vacía (vale 0)."""
+
 
     if len(lista_productos) == 0:
         return 0
@@ -173,7 +169,7 @@ def total_registros(productos_dic):
 
 
 def conteo_por_categoria(productos_dic):
-    """Cantidad de productos de cada categoría."""
+
     conteo = {}
 
     for p in productos_dic.values():
@@ -183,7 +179,7 @@ def conteo_por_categoria(productos_dic):
 
 
 def conteo_por_proveedor(productos_dic, lista_prov):
-    """Cantidad de productos de cada proveedor (los que no tienen productos cuentan 0)."""
+
     conteo = {}
 
     for fila in lista_prov:
@@ -197,7 +193,7 @@ def conteo_por_proveedor(productos_dic, lista_prov):
 
 
 def porcentaje_cantidad_por_categoria(productos_dic):
-    """Porcentaje de productos de cada categoría sobre el total."""
+
     total = total_registros(productos_dic)
     porcentajes = {}
 
@@ -218,7 +214,7 @@ def promedio_precio(productos_dic):
 
 
 def promedio_precio_por_categoria(productos_dic):
-    """Promedio de precio de los productos de cada categoría."""
+
     sumas = {}
 
     for p in productos_dic.values():
@@ -247,7 +243,7 @@ def buscar_por_categoria(productos_dic, categoria):
 
 
 def precios_con_iva(productos_dic):
-    """Lista de tuplas (nombre, precio con IVA)."""
+
     return list(map(lambda p: (p["nombre"], p["precio"] * 1.21), productos_dic.values()))
 
 
@@ -258,12 +254,12 @@ def productos_sin_stock(productos_dic):
 
 
 def productos_vendidos_sin_stock(ventas_dic, productos_dic):
-    """Intersección: productos que se vendieron y hoy no tienen stock (hay que reponer)."""
+    
     return set(ventas_dic.keys()) & set(productos_sin_stock(productos_dic).keys())
 
 
 def categorias_sin_ventas(ventas_dic, productos_dic):
-    """Diferencia: categorías que no tuvieron ninguna venta."""
+
     categorias_vendidas = set()
 
     for id_prod in ventas_dic:
@@ -276,8 +272,7 @@ def categorias_sin_ventas(ventas_dic, productos_dic):
 
 
 def resumen_estadistico(productos_dic):
-    """Devuelve un diccionario con el resumen del inventario.
-    Los precios se guardan en una tupla (minimo, maximo, promedio) porque no se modifican."""
+
 
     if len(productos_dic) == 0:
         return {}
@@ -321,8 +316,6 @@ def mostrar_resumen(productos_dic):
 
 
 def mostrar_tabla(titulo, datos, columna, formato):
-    """Imprime un diccionario {nombre: valor} como tabla de dos columnas.
-    formato es un molde de texto para el valor, por ejemplo "{}", "${:.2f}" o "{:.2f}%"."""
 
     if len(datos) == 0:
         print("No hay datos.")
