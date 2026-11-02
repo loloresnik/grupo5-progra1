@@ -156,12 +156,6 @@ def stock_por_proveedor(productos, id_prov):
     return sum(p["stock"] for p in productos.values() if p["id_proveedor"] == id_prov)
 
 
-def enmascarar_mail(mail):
-    """Oculta parte del mail usando rebanadas"""
-    arroba = mail.find("@")
-    return mail[:arroba][:3] + "***" + mail[arroba:]
-
-
 def mostrar_proveedores(proveedores):
     if len(proveedores) == 0:
         print("No hay proveedores cargados.")
@@ -173,6 +167,6 @@ def mostrar_proveedores(proveedores):
     print("-" * 75)
 
     for fila in proveedores:
-        print(f"{fila[0]:<6} {fila[1][:20]:<20} {fila[2]:<16} {enmascarar_mail(fila[3]):<30}")
+        print(f"{fila[0]:<6} {fila[1][:20]:<20} {fila[2]:<16} {fila[3]:<30}")
 
     print("-" * 75)

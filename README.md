@@ -49,7 +49,7 @@ Usuarios iniciales: `admin` / `1234` (administrador) y `usuario` / `1234`.
 | Matrices | `proveedores` `[id, nombre, telefono, mail]` y `movimientos` `[tipo, id, cantidad, fecha]` |
 | Tuplas | Fecha `(dia, mes, anio)`, sesión `(usuario, rol)`, tipos de movimiento `("Ingreso", "Egreso")`, roles, días de cada mes, ranking `(cantidad, nombre)` y precios `(min, max, promedio)` |
 | Conjuntos | Categorías únicas, proveedores sin productos (diferencia), vendidos sin stock (intersección), categorías sin ventas (diferencia) e IDs repetidos al leer el TXT |
-| Cadenas | f-strings, `strip`/`lower`/`upper`, rebanadas (`nombre[:18]`, `capitalizar`, código de categoría, mail enmascarado), operador `in` |
+| Cadenas | f-strings, `strip`/`lower`/`upper`, rebanadas (`nombre[:18]`, `capitalizar`, código de categoría), operador `in` |
 | Lambda | `map` (precios con IVA), `filter` (productos sin stock), `reduce` (valor del inventario) |
 | Expresiones regulares | `proveedores.py`: nombre con tildes y ñ, teléfono y mail; `menu.py`: formato de fecha dd/mm/aaaa |
 | Excepciones | `try/except` al convertir los números en `menu.py`, `raise ValueError` en las altas, bajas y modificaciones, `try/except` en todos los menús, `FileNotFoundError` y `ValueError` en `archivos.py` |
