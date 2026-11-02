@@ -1,13 +1,8 @@
 import re
 
-# La matriz de proveedores es una lista de listas:
-# proveedor = [id, nombre, telefono, mail]
 
-
-# Búsqueda recursiva por ID
 def buscar_proveedor_recursivo(proveedores, id_prov, i=0):
-    """Recorre la matriz de forma recursiva y devuelve la fila del proveedor.
-    Caso base: se llegó al final de la matriz (no existe) o se encontró el ID."""
+    """Recorre la matriz de forma recursiva y devuelve la fila del proveedor."""
 
     if i == len(proveedores):
         return None
@@ -42,7 +37,6 @@ def ids_proveedores(proveedores):
     return ids
 
 
-# Validaciones con expresiones regulares
 def validar_nombre(nombre):
     """Letras (con tildes y ñ), números, espacios, puntos o guiones."""
     return re.match(r"^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9 .\-]+$", nombre) is not None
@@ -58,7 +52,6 @@ def validar_mail(mail):
     return re.match(r"^[\w.\-]+@[\w\-]+(\.[a-z]{2,3}){1,2}$", mail) is not None
 
 
-# Alta
 def agregar_proveedor(proveedores, id_prov, nombre, telefono, mail):
     """Agrega un proveedor a la matriz. Lanza ValueError si algún dato es inválido."""
 
@@ -81,16 +74,13 @@ def agregar_proveedor(proveedores, id_prov, nombre, telefono, mail):
     proveedores.append([id_prov, nombre, telefono, mail])
 
 
-# Búsqueda por nombre (parcial, sin distinguir mayúsculas)
 def buscar_proveedor(proveedores, texto):
     texto = texto.strip().lower()
     return [fila for fila in proveedores if texto in fila[1].lower()]
 
 
-# Modificación
 def modificar_proveedor(proveedores, id_prov, nuevo_nombre, nuevo_telefono, nuevo_mail):
-    """Modifica los datos indicados (los que llegan en None no se cambian).
-    Como los productos guardan el ID del proveedor, no hace falta modificarlos."""
+    """Modifica los datos indicados, como los productos guardan el ID del proveedor, no hace falta modificarlos."""
 
     fila = buscar_proveedor_por_id(proveedores, id_prov)
 
@@ -113,7 +103,6 @@ def modificar_proveedor(proveedores, id_prov, nuevo_nombre, nuevo_telefono, nuev
         fila[3] = nuevo_mail.strip().lower()
 
 
-# Baja
 def eliminar_proveedor(proveedores, id_prov, productos):
     """Solo elimina si NO hay productos asociados al proveedor."""
 
@@ -128,7 +117,7 @@ def eliminar_proveedor(proveedores, id_prov, productos):
     proveedores.remove(fila)
 
 
-# Relación proveedor (A) -> productos (B)
+
 def ids_con_productos(productos):
     """Conjunto con los IDs de proveedores que tienen al menos un producto."""
     ids = set()
@@ -167,9 +156,8 @@ def stock_por_proveedor(productos, id_prov):
     return sum(p["stock"] for p in productos.values() if p["id_proveedor"] == id_prov)
 
 
-# Mostrar
 def enmascarar_mail(mail):
-    """Oculta parte del mail usando rebanadas: ventas@empresa.com -> ven***@empresa.com"""
+    """Oculta parte del mail usando rebanadas"""
     arroba = mail.find("@")
     return mail[:arroba][:3] + "***" + mail[arroba:]
 
