@@ -8,7 +8,6 @@ def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedor
 
     print("\n=== AGREGAR PRODUCTO ===")
 
-    # ID
     id_prod = input("Ingrese ID del producto: ").strip()
 
     while re.match(r"^\d+$", id_prod) is None:
@@ -25,7 +24,6 @@ def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedor
 
         return 0
 
-    # Nombre
     nombre = input("Ingrese el nombre del producto: ").strip()
 
     while re.match(r"^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$", nombre) is None:
@@ -34,7 +32,6 @@ def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedor
 
         nombre = input("Ingrese el nombre del producto: ").strip()
 
-    # Categoría
     categoria = input("Ingrese la categoría: ").strip()
 
     while re.match(r"^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$", nombre) is None:
@@ -43,7 +40,6 @@ def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedor
 
         categoria = input("Ingrese la categoría: ").strip()
 
-    # Proveedor
     proveedor = input("Ingrese el proveedor: ").strip()
 
     while re.match(r"^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$", proveedor) is None:
@@ -52,7 +48,6 @@ def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedor
 
         proveedor = input("Ingrese el proveedor: ").strip()
 
-    # Stock
     stock = input("Ingrese el stock inicial: ").strip()
 
     while re.match(r"^\d+$", stock) is None:
@@ -61,7 +56,6 @@ def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedor
 
         stock = input("Ingrese el stock inicial: ").strip()
 
-    # Precio
     precio = input("Ingrese el precio del producto: ").strip()
 
     while re.match(r"^\d+$", precio) is None:
@@ -89,7 +83,6 @@ def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedor
 
     return 1
 
-
 # Buscar producto 
 def buscar_producto_dic(productos_dic, id_prod):
     """Recorre la lista y devuelve el diccionario del producto si encuentra coincidencia.
@@ -102,7 +95,6 @@ def buscar_producto_dic(productos_dic, id_prod):
             return p
 
     return None
-
 
 # Mostrar productos 
 def mostrar_productos_dic(productos_dic):
@@ -124,7 +116,6 @@ def mostrar_productos_dic(productos_dic):
         print(f"{p['id']:<15} {p['nombre']:<15} {p['categoria']:<15} {p['proveedor']:<15} {p['stock']:<10} ${p['precio']}")
 
     print("-" * 100)
-
 
 # Modificar producto 
 def modificar_producto_dic(productos_dic, id_prod, nuevo_nombre, nueva_categoria, nuevo_proveedor, nuevo_precio, categorias_unicas, proveedores_unicos):
@@ -196,7 +187,6 @@ def eliminar_producto_dic(productos_dic, id_prod, ids_unicos):
 
         return 0
 
-
 # Registrar movimiento
 def agregar_movimiento(movimientos, tipo, id_prod, cantidad, productos_dic):
 
@@ -258,8 +248,6 @@ def agregar_movimiento(movimientos, tipo, id_prod, cantidad, productos_dic):
 
         return 0
 
-
-
 # Mostrar movimientos
 def mostrar_movimientos(movimientos):
     """Muestra todos los movimientos registrados."""
@@ -314,7 +302,6 @@ def ingreso_stock_dic(productos_dic, id_prod, cantidad):
 
         return 0
 
-
 def guardar_productos_json(productos_dic):
 
     try:
@@ -355,13 +342,89 @@ def cargar_productos_json():
 
         return []
 
-    except json.JSONDecodeError:
-
-        return []
-
     except Exception as error:
 
         print("Error al cargar productos:", error)
 
         return []
-    
+
+def guardar_movimientos_txt(movimientos):
+
+    try:
+
+        archivo = open(
+            "movimientos.txt",
+            "w",
+            encoding="utf-8"
+        )
+
+        for movimiento in movimientos:
+
+            tipo = movimiento[0]
+            id_prod = movimiento[1]
+            cantidad = movimiento[2]
+
+            fecha = movimiento[3]
+
+            linea = "{};{};{};{};{};{}\n".format(
+                tipo,
+                id_prod,
+                cantidad,
+                fecha[0],
+                fecha[1],
+                fecha[2]
+            )
+
+            archivo.write(linea)
+
+        archivo.close()
+
+        return 1
+
+    except Exception as error:
+
+        print("Error al guardar movimientos:", error)
+
+        return 0
+
+    movimientos = []
+
+    try:
+
+        archivo = open(
+            "movimientos.txt",
+            "r",
+            encoding="utf-8"
+        )
+
+        for linea in archivo:
+
+            datos = linea.strip().split(";")
+
+            movimiento = [
+                datos[0],
+                int(datos[1]),
+                int(datos[2]),
+                (
+                    int(datos[3]),
+                    int(datos[4]),
+                    int(datos[5])
+                )
+            ]
+
+            movimientos.append(movimiento)
+
+        archivo.close()
+
+        return movimientos
+
+    except FileNotFoundError:
+
+        return []
+
+    except Exception as error:
+
+        print("Error al cargar movimientos:", error)
+
+        return []
+
