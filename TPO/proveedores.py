@@ -1,3 +1,4 @@
+
 import re
 
 
@@ -49,7 +50,7 @@ def validar_telefono(telefono):
 
 def validar_mail(mail):
     """usuario@dominio.com o usuario@dominio.com.ar"""
-    return re.match(r"^[\w.\-]+@[\w\-]+(\.[a-z]{2,3}){1,2}$", mail) is not None
+    return re.match(r"^[\w.\-]+@[\w\-]+(\.[a-z]{2,3}){1,2}$", mail, re.IGNORECASE) is not None
 
 
 def agregar_proveedor(proveedores, id_prov, nombre, telefono, mail):
@@ -75,8 +76,12 @@ def agregar_proveedor(proveedores, id_prov, nombre, telefono, mail):
 
 
 def buscar_proveedor(proveedores, texto):
-    texto = texto.strip().lower()
-    return [fila for fila in proveedores if texto in fila[1].lower()]
+    texto = texto.strip()
+
+    if texto == "":
+        return []
+
+    return [fila for fila in proveedores if re.search(re.escape(texto), fila[1], re.IGNORECASE)]
 
 
 def modificar_proveedor(proveedores, id_prov, nuevo_nombre, nuevo_telefono, nuevo_mail):
@@ -88,19 +93,28 @@ def modificar_proveedor(proveedores, id_prov, nuevo_nombre, nuevo_telefono, nuev
         raise ValueError("Proveedor no encontrado.")
 
     if nuevo_nombre is not None:
-        if not validar_nombre(nuevo_nombre.strip()):
+        nuevo_nombre = nuevo_nombre.strip()
+
+        if not validar_nombre(nuevo_nombre):
             raise ValueError("El nombre del proveedor es inválido.")
-        fila[1] = nuevo_nombre.strip()
+
+        fila[1] = nuevo_nombre
 
     if nuevo_telefono is not None:
-        if not validar_telefono(nuevo_telefono.strip()):
+        nuevo_telefono = nuevo_telefono.strip()
+
+        if not validar_telefono(nuevo_telefono):
             raise ValueError("El teléfono es inválido.")
-        fila[2] = nuevo_telefono.strip()
+
+        fila[2] = nuevo_telefono
 
     if nuevo_mail is not None:
-        if not validar_mail(nuevo_mail.strip().lower()):
+        nuevo_mail = nuevo_mail.strip().lower()
+
+        if not validar_mail(nuevo_mail):
             raise ValueError("El mail es inválido.")
-        fila[3] = nuevo_mail.strip().lower()
+
+        fila[3] = nuevo_mail
 
 
 def eliminar_proveedor(proveedores, id_prov, productos):
@@ -115,7 +129,6 @@ def eliminar_proveedor(proveedores, id_prov, productos):
         raise ValueError("No se puede eliminar: el proveedor tiene productos asociados.")
 
     proveedores.remove(fila)
-
 
 
 def ids_con_productos(productos):
@@ -136,11 +149,14 @@ def proveedores_sin_productos(proveedores, productos):
 def buscar_productos_por_proveedor(productos, proveedores, texto):
     """Busca los proveedores cuyo nombre contiene el texto y devuelve sus productos."""
 
-    texto = texto.strip().lower()
+    texto = texto.strip()
     ids = set()
 
+    if texto == "":
+        return {}
+
     for fila in proveedores:
-        if texto in fila[1].lower():
+        if re.search(re.escape(texto), fila[1], re.IGNORECASE):
             ids.add(fila[0])
 
     resultado = {}
