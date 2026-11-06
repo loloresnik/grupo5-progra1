@@ -1,4 +1,5 @@
 from functools import reduce
+import json
 import gestion_productos
 import proveedores
 
@@ -104,6 +105,62 @@ def recaudacion_total(ventas_dic):
         total += datos["recaudado"]
 
     return total
+
+
+
+def guardar_ventas_json(ventas_dic):
+    """Guarda las ventas en ventas.json.
+    JSON no acepta tuplas como clave, asi que cada venta se guarda como
+    un diccionario con el id y el nombre por separado."""
+
+    lista = []
+
+    for clave, datos in ventas_dic.items():
+        lista.append({
+            "id": clave[0],
+            "nombre": clave[1],
+            "categoria": datos["categoria"],
+            "cantidad": datos["cantidad"],
+            "recaudado": datos["recaudado"]
+        })
+
+    try:
+        archivo = open("ventas.json", "w", encoding="utf-8")
+        json.dump(lista, archivo, indent=4, ensure_ascii=False)
+        archivo.close()
+        return 1
+
+    except (OSError, TypeError) as error:
+        print("Error al guardar ventas:", error)
+        return 0
+
+
+def cargar_ventas_json():
+    """Carga ventas.json y vuelve a armar la clave (id, nombre) como tupla."""
+
+    try:
+        archivo = open("ventas.json", "r", encoding="utf-8")
+        lista = json.load(archivo)
+        archivo.close()
+
+        ventas_dic = {}
+
+        for venta in lista:
+            clave = (int(venta["id"]), venta["nombre"])
+            ventas_dic[clave] = {
+                "categoria": venta["categoria"],
+                "cantidad": venta["cantidad"],
+                "recaudado": venta["recaudado"]
+            }
+
+        return ventas_dic
+
+    except FileNotFoundError:
+        return {}
+
+    except (OSError, ValueError, KeyError, TypeError) as error:
+        print("Error al cargar ventas:", error)
+        return {}
 
 
 
