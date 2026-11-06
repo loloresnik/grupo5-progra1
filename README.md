@@ -12,25 +12,44 @@ Los datos se guardan en archivos de texto (TXT) y JSON, por lo que se conservan 
 
 Funcionalidades
 Alta, baja, búsqueda, modificación y consulta de productos.
+
 Gestión de stock y movimientos (ingresos y egresos con fecha).
+
 Gestión de proveedores, relacionados con los productos por ID.
+
 Gestión y consultas de categorías.
+
 Registro de ventas con control del stock disponible.
+
 Reportes y estadísticas: más y menos vendidos, recaudación, valores máximos y mínimos, valor total del stock, conteos, promedios y porcentajes por categoría y por proveedor, y resumen estadístico.
+
 Inicio de sesión con distintos niveles de acceso y un máximo de 3 intentos.
+
 Alta y baja de empleados.
+
 Guardado de todos los datos en archivos TXT y JSON.
+
 Validaciones de datos y manejo de errores con try/except.
+
 Estructura del proyecto
+
 Módulos (carpeta TPO/)
 MainP.py: programa principal. Carga los datos desde los archivos y coordina el inicio de sesión y los menús.
+
 menu.py: menús del sistema. Solo muestra las opciones y llama a las funciones de cada módulo.
+
 gestion_productos.py: gestión de productos, stock y movimientos.
+
 proveedores.py: gestión de proveedores.
+
 Reporte.py: ventas, reportes y estadísticas.
+
 empleados.py: inicio de sesión y gestión de empleados y usuarios.
+
 validaciones.py: funciones para pedir y validar datos ingresados por el usuario.
+
 Archivos de datos (carpeta TPO/)
+
 Archivo	Contenido	Estructura en el programa
 proveedores.txt	Proveedores (id;nombre;telefono;mail)	Matriz (lista de listas)
 movimientos.txt	Ingresos y egresos (tipo;id_producto;cantidad;dia;mes;año)	Matriz (lista de listas)
@@ -84,7 +103,9 @@ Scrum Master: Lorenzo Resnik
 
 Recursos
 Repositorio: https://github.com/loloresnik/grupo5-progra1
+
 Primera entrega
+
 Video de presentación: https://youtu.be/ZnmKXiAl1yw
 Video de funcionamiento: https://youtu.be/UmUBWy5wKCc
 Segunda entrega
