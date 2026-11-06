@@ -4,8 +4,17 @@ import proveedores
 
 
 
-def registrar_venta(ventas_dic, productos_dic, movimientos, id_prod, cantidad, fecha):
-  
+def clave_venta(id_prod, producto):
+    """Clave de la venta segun el producto: (ID, nombre).
+    Si se borra un producto y se reutiliza su ID con otro producto,
+    las ventas nuevas quedan separadas de las viejas."""
+
+    return (id_prod, producto["nombre"])
+
+
+def registrar_venta(ventas_dic, productos_dic, movimientos, id_prod, cantidad):
+    """Registra la venta solo si el movimiento de egreso se pudo registrar.
+    Si el movimiento falla, lanza ValueError y no modifica stock, ventas ni recaudacion."""
 
     producto = gestion_productos.buscar_producto_dic(productos_dic, id_prod)
 
@@ -18,18 +27,31 @@ def registrar_venta(ventas_dic, productos_dic, movimientos, id_prod, cantidad, f
     if cantidad > producto["stock"]:
         raise ValueError(f"Stock insuficiente (disponible: {producto['stock']}).")
 
+    ok = gestion_productos.agregar_movimiento(movimientos, "Egreso", id_prod, cantidad, productos_dic)
+
+    if ok == 0:
+        raise ValueError("No se pudo registrar el movimiento. La venta no se realizo.")
+
     producto["stock"] -= cantidad
-    ventas_dic[id_prod] = ventas_dic.get(id_prod, 0) + cantidad
-    gestion_productos.agregar_movimiento(movimientos, "Egreso", id_prod, cantidad, fecha)
+
+    clave = clave_venta(id_prod, producto)
+
+    if clave not in ventas_dic:
+        ventas_dic[clave] = {"categoria": producto["categoria"], "cantidad": 0, "recaudado": 0}
+
+    ventas_dic[clave]["cantidad"] += cantidad
+    ventas_dic[clave]["recaudado"] += cantidad * producto["precio"]
 
 
-def nombre_producto(productos_dic, id_prod):
+def nombre_producto(productos_dic, clave):
+    """Devuelve el nombre guardado en la venta. Si ese producto ya no existe, lo marca como eliminado."""
+    id_prod, nombre = clave
     producto = gestion_productos.buscar_producto_dic(productos_dic, id_prod)
 
-    if producto is None:
-        return "Eliminado"
+    if producto is None or clave_venta(id_prod, producto) != clave:
+        return nombre + " (eliminado)"
 
-    return producto["nombre"]
+    return nombre
 
 
 def mostrar_ventas(ventas_dic, productos_dic):
@@ -38,23 +60,29 @@ def mostrar_ventas(ventas_dic, productos_dic):
         return
 
     print("\n--- LISTA DE VENTAS ---")
-    print("-" * 50)
-    print(f"{'ID Producto':<15} {'Nombre':<20} {'Vendidos':<10}")
-    print("-" * 50)
+    print("-" * 65)
+    print(f"{'ID Producto':<15} {'Nombre':<20} {'Vendidos':<10} {'Recaudado':>15}")
+    print("-" * 65)
 
-    for id_prod, cantidad in ventas_dic.items():
-        print(f"{id_prod:<15} {nombre_producto(productos_dic, id_prod)[:20]:<20} {cantidad:<10}")
+    for clave, datos in ventas_dic.items():
+        print(f"{clave[0]:<15} {nombre_producto(productos_dic, clave)[:20]:<20} {datos['cantidad']:<10} ${datos['recaudado']:>14}")
 
-    print("-" * 50)
+    print("-" * 65)
 
 
 def ventas_totales(ventas_dic):
-    return sum(ventas_dic.values())
+    return sum(datos["cantidad"] for datos in ventas_dic.values())
 
 
-def ranking_ventas(ventas_dic, productos_dic):
+def ranking_ventas(ventas_dic, productos_dic, incluir_sin_ventas=False):
+    """Lista de tuplas (cantidad, nombre) ordenada de mayor a menor.
+    Con incluir_sin_ventas=True agrega los productos actuales que no vendieron nada, con 0."""
 
-    lista = [(cantidad, nombre_producto(productos_dic, id_prod)) for id_prod, cantidad in ventas_dic.items()]
+    lista = [(datos["cantidad"], nombre_producto(productos_dic, clave)) for clave, datos in ventas_dic.items()]
+
+    if incluir_sin_ventas:
+        lista += [(0, p["nombre"]) for id_prod, p in productos_dic.items() if clave_venta(id_prod, p) not in ventas_dic]
+
     return sorted(lista, reverse=True)
 
 
@@ -64,16 +92,16 @@ def top_mas_vendidos(ventas_dic, productos_dic):
 
 
 def menos_vendidos(ventas_dic, productos_dic):
-    return [nombre for cantidad, nombre in ranking_ventas(ventas_dic, productos_dic)[::-1][:3]]
+    return [nombre for cantidad, nombre in ranking_ventas(ventas_dic, productos_dic, True)[::-1][:3]]
 
 
-def recaudacion_total(ventas_dic, productos_dic):
+def recaudacion_total(ventas_dic):
+    """Suma lo recaudado en cada venta con el precio que tenia el producto al venderse,
+    asi no cambia si despues se modifica el precio o se elimina el producto."""
     total = 0
 
-    for id_prod, cantidad in ventas_dic.items():
-        producto = gestion_productos.buscar_producto_dic(productos_dic, id_prod)
-        if producto is not None:
-            total += cantidad * producto["precio"]
+    for datos in ventas_dic.values():
+        total += datos["recaudado"]
 
     return total
 
@@ -255,18 +283,21 @@ def productos_sin_stock(productos_dic):
 
 def productos_vendidos_sin_stock(ventas_dic, productos_dic):
     
-    return set(ventas_dic.keys()) & set(productos_sin_stock(productos_dic).keys())
+    sin_stock = {clave_venta(id_prod, p) for id_prod, p in productos_sin_stock(productos_dic).items()}
+
+    return {clave[0] for clave in set(ventas_dic.keys()) & sin_stock}
 
 
 def categorias_sin_ventas(ventas_dic, productos_dic):
 
     categorias_vendidas = set()
 
-    for id_prod in ventas_dic:
-        if id_prod in productos_dic:
-            categorias_vendidas.add(productos_dic[id_prod]["categoria"])
+    for datos in ventas_dic.values():
+        categorias_vendidas.add(datos["categoria"])
 
-    return gestion_productos.categorias_unicas(productos_dic) - categorias_vendidas
+    categorias = {p["categoria"] for p in productos_dic.values()}
+
+    return categorias - categorias_vendidas
 
 
 
@@ -283,7 +314,7 @@ def resumen_estadistico(productos_dic):
 
     return {
         "productos": total_registros(productos_dic),
-        "categorias": len(gestion_productos.categorias_unicas(productos_dic)),
+        "categorias": len({p["categoria"] for p in productos_dic.values()}),
         "unidades": sum(p["stock"] for p in productos_dic.values()),
         "valor_total": valor_total_stock(productos_dic),
         "precios": (minimo, maximo, promedio_precio(productos_dic)),
