@@ -1,1 +1,10 @@
-1;razer;11413590;razer@pro.com.ar
+1;Tecno Sur Distribuidora;11-45678901;ventas@tecnosur.com.ar
+2;Megabyte Mayorista;11-43219876;pedidos@megabyte.com.ar
+3;Componentes del Plata;11-48765432;info@componentesplata.com
+4;Periféricos Express;351-4208200;ventas@perifericosexpress.com
+5;Red Total SRL;11-47001234;contacto@redtotal.com.ar
+6;Digital Import;11-55554444;importaciones@digitalimport.com
+7;Compu Norte;381-4223344;norte@compunorte.com.ar
+8;Byte Center;11-46667788;byte@bytecenter.com
+9;Hardware Litoral;341-4456677;ventas@hardwarelitoral.com.ar
+10;Almacenamiento Plus;11-49998877;info@almacenamientoplus.com

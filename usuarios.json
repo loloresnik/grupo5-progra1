@@ -11,7 +11,42 @@
     },
     {
         "usuario": "ivan",
-        "clave": "132912",
+        "clave": "ivan2026",
+        "tipo": "admin"
+    },
+    {
+        "usuario": "lorenzo",
+        "clave": "lorenzo2026",
+        "tipo": "usuario"
+    },
+    {
+        "usuario": "damian",
+        "clave": "damian2026",
+        "tipo": "usuario"
+    },
+    {
+        "usuario": "franco",
+        "clave": "franco2026",
+        "tipo": "usuario"
+    },
+    {
+        "usuario": "simon",
+        "clave": "simon2026",
+        "tipo": "usuario"
+    },
+    {
+        "usuario": "deposito",
+        "clave": "deposito1",
+        "tipo": "usuario"
+    },
+    {
+        "usuario": "caja",
+        "clave": "caja1",
+        "tipo": "usuario"
+    },
+    {
+        "usuario": "ventas",
+        "clave": "ventas1",
         "tipo": "usuario"
     }
 ]

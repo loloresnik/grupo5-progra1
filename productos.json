@@ -1,0 +1,72 @@
+{
+    "101": {
+        "nombre": "Teclado Mecánico",
+        "categoria": "Periféricos",
+        "id_proveedor": 4,
+        "stock": 15,
+        "precio": 85000
+    },
+    "102": {
+        "nombre": "Mouse Inalámbrico",
+        "categoria": "Periféricos",
+        "id_proveedor": 4,
+        "stock": 30,
+        "precio": 25000
+    },
+    "103": {
+        "nombre": "Auriculares Gamer",
+        "categoria": "Periféricos",
+        "id_proveedor": 1,
+        "stock": 0,
+        "precio": 60000
+    },
+    "104": {
+        "nombre": "Monitor Curvo",
+        "categoria": "Periféricos",
+        "id_proveedor": 6,
+        "stock": 8,
+        "precio": 320000
+    },
+    "105": {
+        "nombre": "Memoria RAM",
+        "categoria": "Componentes",
+        "id_proveedor": 3,
+        "stock": 20,
+        "precio": 55000
+    },
+    "106": {
+        "nombre": "Placa de Video",
+        "categoria": "Componentes",
+        "id_proveedor": 2,
+        "stock": 0,
+        "precio": 850000
+    },
+    "107": {
+        "nombre": "Fuente de Poder",
+        "categoria": "Componentes",
+        "id_proveedor": 3,
+        "stock": 12,
+        "precio": 95000
+    },
+    "108": {
+        "nombre": "Disco Sólido",
+        "categoria": "Almacenamiento",
+        "id_proveedor": 2,
+        "stock": 25,
+        "precio": 70000
+    },
+    "109": {
+        "nombre": "Pendrive",
+        "categoria": "Almacenamiento",
+        "id_proveedor": 1,
+        "stock": 40,
+        "precio": 12000
+    },
+    "110": {
+        "nombre": "Router Inalámbrico",
+        "categoria": "Redes",
+        "id_proveedor": 5,
+        "stock": 10,
+        "precio": 45000
+    }
+}

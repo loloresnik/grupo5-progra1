@@ -1,0 +1,72 @@
+[
+    {
+        "id": 101,
+        "nombre": "Teclado Mecánico",
+        "categoria": "Periféricos",
+        "cantidad": 5,
+        "recaudado": 425000
+    },
+    {
+        "id": 102,
+        "nombre": "Mouse Inalámbrico",
+        "categoria": "Periféricos",
+        "cantidad": 18,
+        "recaudado": 450000
+    },
+    {
+        "id": 103,
+        "nombre": "Auriculares Gamer",
+        "categoria": "Periféricos",
+        "cantidad": 7,
+        "recaudado": 420000
+    },
+    {
+        "id": 104,
+        "nombre": "Monitor Curvo",
+        "categoria": "Periféricos",
+        "cantidad": 2,
+        "recaudado": 640000
+    },
+    {
+        "id": 105,
+        "nombre": "Memoria RAM",
+        "categoria": "Componentes",
+        "cantidad": 10,
+        "recaudado": 550000
+    },
+    {
+        "id": 106,
+        "nombre": "Placa de Video",
+        "categoria": "Componentes",
+        "cantidad": 3,
+        "recaudado": 2550000
+    },
+    {
+        "id": 107,
+        "nombre": "Fuente de Poder",
+        "categoria": "Componentes",
+        "cantidad": 4,
+        "recaudado": 380000
+    },
+    {
+        "id": 108,
+        "nombre": "Disco Sólido",
+        "categoria": "Almacenamiento",
+        "cantidad": 12,
+        "recaudado": 840000
+    },
+    {
+        "id": 109,
+        "nombre": "Pendrive",
+        "categoria": "Almacenamiento",
+        "cantidad": 25,
+        "recaudado": 300000
+    },
+    {
+        "id": 120,
+        "nombre": "Webcam",
+        "categoria": "Periféricos",
+        "cantidad": 6,
+        "recaudado": 228000
+    }
+]
