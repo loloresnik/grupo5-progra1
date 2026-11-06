@@ -2,6 +2,7 @@ from functools import reduce
 import json
 import gestion_productos
 import proveedores
+import validaciones
 
 
 
@@ -158,7 +159,7 @@ def cargar_ventas_json():
     except FileNotFoundError:
         return {}
 
-    except (OSError, ValueError, KeyError, TypeError) as error:
+    except (OSError, json.JSONDecodeError, ValueError, KeyError, TypeError) as error:
         print("Error al cargar ventas:", error)
         return {}
 
@@ -419,3 +420,249 @@ def mostrar_tabla(titulo, datos, columna, formato):
         print(f"{clave[:3].upper():<5}{clave[:20]:<20} {formato.format(valor):>14}")
 
     print("-" * 40)
+
+
+# ============================
+# FUNCIONES QUE LLAMA EL MENU
+# ============================
+
+# Registrar venta (pide los datos)
+def venta(ventas_dic, productos_dic, movimientos):
+    """Pide producto y cantidad y registra la venta.
+    Si algún dato es inválido, muestra el error y no registra nada."""
+
+    print("\n=== REGISTRAR VENTA ===")
+
+    id_prod = validaciones.pedir_entero("Ingrese ID del producto: ")
+
+    cantidad = validaciones.pedir_entero("Ingrese cantidad: ")
+
+    try:
+
+        registrar_venta(ventas_dic, productos_dic, movimientos, id_prod, cantidad)
+
+    except ValueError as error:
+
+        print("Error:", error)
+
+        return 0
+
+    gestion_productos.guardar_productos_json(productos_dic)
+
+    guardar_ventas_json(ventas_dic)
+
+    print("Venta registrada correctamente.")
+
+    return 1
+
+
+# Ventas totales
+def mostrar_ventas_totales(ventas_dic):
+
+    print(f"Unidades vendidas en total: {ventas_totales(ventas_dic)}")
+
+
+# Recaudacion
+def mostrar_recaudacion(ventas_dic):
+
+    print(f"Recaudación total: ${recaudacion_total(ventas_dic):.2f}")
+
+
+# Top de productos
+def mostrar_top(titulo, nombres):
+    """Muestra una lista de nombres numerada."""
+
+    if len(nombres) == 0:
+
+        print("No hay datos.")
+
+        return
+
+    print(f"\n--- {titulo} ---")
+
+    for i in range(len(nombres)):
+
+        print(f"{i + 1}. {nombres[i]}")
+
+
+def mostrar_mas_vendidos(ventas_dic, productos_dic):
+
+    mostrar_top("TOP 3 MAS VENDIDOS", top_mas_vendidos(ventas_dic, productos_dic))
+
+
+def mostrar_menos_vendidos(ventas_dic, productos_dic):
+
+    mostrar_top("TOP 3 MENOS VENDIDOS", menos_vendidos(ventas_dic, productos_dic))
+
+
+# Producto con valor maximo o minimo
+def mostrar_producto_extremo(titulo, producto, campo):
+    """Muestra el nombre del producto y el valor del campo pedido (precio o stock)."""
+
+    if producto is None:
+
+        print("No hay productos cargados.")
+
+        return
+
+    print(f"{titulo}: {producto['nombre']} ({campo}: {producto[campo]})")
+
+
+def mostrar_mas_caro(productos_dic):
+
+    mostrar_producto_extremo("Producto más caro", producto_mas_caro(productos_dic), "precio")
+
+
+def mostrar_mas_barato(productos_dic):
+
+    mostrar_producto_extremo("Producto más barato", producto_menos_caro(productos_dic), "precio")
+
+
+def mostrar_mayor_stock(productos_dic):
+
+    mostrar_producto_extremo("Producto con mayor stock", producto_mayor_stock(productos_dic), "stock")
+
+
+def mostrar_menor_stock(productos_dic):
+
+    mostrar_producto_extremo("Producto con menor stock", producto_menor_stock(productos_dic), "stock")
+
+
+# Valor total del stock
+def mostrar_valor_total(productos_dic):
+    """Muestra el valor total del stock calculado de tres formas:
+    con un ciclo, con reduce y con recursividad. Las tres deben coincidir."""
+
+    print("\n--- VALOR TOTAL DEL STOCK ---")
+    print(f"Con ciclo for:      ${valor_total_stock(productos_dic):.2f}")
+    print(f"Con reduce:         ${valor_total_reduce(productos_dic):.2f}")
+    print(f"Con recursividad:   ${valor_total_recursivo(list(productos_dic.values())):.2f}")
+
+
+# Precios con IVA
+def mostrar_precios_con_iva(productos_dic):
+
+    precios = precios_con_iva(productos_dic)
+
+    if len(precios) == 0:
+
+        print("No hay productos cargados.")
+
+        return
+
+    print("\n--- PRECIOS CON IVA (21%) ---")
+
+    for nombre, precio in precios:
+
+        print(f"{nombre[:20]:<20} ${precio:>10.2f}")
+
+
+# Productos sin stock
+def mostrar_productos_sin_stock(productos_dic, proveedores_lista):
+
+    print("\n=== PRODUCTOS SIN STOCK ===")
+
+    gestion_productos.mostrar_productos_dic(productos_sin_stock(productos_dic), proveedores_lista)
+
+
+# Productos vendidos que se quedaron sin stock (interseccion de conjuntos)
+def mostrar_vendidos_sin_stock(ventas_dic, productos_dic):
+
+    ids = productos_vendidos_sin_stock(ventas_dic, productos_dic)
+
+    if len(ids) == 0:
+
+        print("No hay productos vendidos sin stock.")
+
+        return
+
+    print("\n--- VENDIDOS Y SIN STOCK (reponer) ---")
+
+    for id_prod in sorted(ids):
+
+        print(f"{id_prod:<8} {productos_dic[id_prod]['nombre']}")
+
+
+# Cantidad de productos por proveedor
+def mostrar_conteo_por_proveedor(productos_dic, proveedores_lista):
+
+    mostrar_tabla("PRODUCTOS POR PROVEEDOR", conteo_por_proveedor(productos_dic, proveedores_lista), "Productos", "{}")
+
+
+# ============================
+# CATEGORIAS
+# ============================
+
+def mostrar_categorias(productos_dic):
+    """Muestra las categorías sin repetir, usando un conjunto."""
+
+    categorias = set()
+
+    for p in productos_dic.values():
+
+        categorias.add(p["categoria"])
+
+    if len(categorias) == 0:
+
+        print("No hay categorías registradas.")
+
+        return
+
+    print("\n--- CATEGORIAS ---")
+
+    for cat in sorted(categorias):
+
+        print("-", cat)
+
+
+def mostrar_productos_por_categoria(productos_dic, proveedores_lista):
+
+    categoria = validaciones.pedir_texto("Ingrese categoría: ")
+
+    resultado = buscar_por_categoria(productos_dic, categoria)
+
+    gestion_productos.mostrar_productos_dic(resultado, proveedores_lista)
+
+
+def mostrar_valor_por_categoria(productos_dic):
+
+    mostrar_tabla("VALOR POR CATEGORIA", valor_por_categoria(productos_dic), "Valor", "${:.2f}")
+
+
+def mostrar_porcentaje_valor_por_categoria(productos_dic):
+
+    mostrar_tabla("PORCENTAJE DEL VALOR POR CATEGORIA", porcentaje_valor_por_categoria(productos_dic), "Porcentaje", "{:.2f}%")
+
+
+def mostrar_cantidad_por_categoria(productos_dic):
+
+    print(f"\nTotal de productos registrados: {total_registros(productos_dic)}")
+
+    mostrar_tabla("PRODUCTOS POR CATEGORIA", conteo_por_categoria(productos_dic), "Cantidad", "{}")
+
+    mostrar_tabla("PORCENTAJE DE PRODUCTOS POR CATEGORIA", porcentaje_cantidad_por_categoria(productos_dic), "Porcentaje", "{:.2f}%")
+
+
+def mostrar_promedio_por_categoria(productos_dic):
+
+    print(f"\nPrecio promedio general: ${promedio_precio(productos_dic):.2f}")
+
+    mostrar_tabla("PRECIO PROMEDIO POR CATEGORIA", promedio_precio_por_categoria(productos_dic), "Promedio", "${:.2f}")
+
+
+# Categorias sin ventas (diferencia de conjuntos)
+def mostrar_categorias_sin_ventas(ventas_dic, productos_dic):
+
+    categorias = categorias_sin_ventas(ventas_dic, productos_dic)
+
+    if len(categorias) == 0:
+
+        print("Todas las categorías tienen ventas.")
+
+        return
+
+    print("\n--- CATEGORIAS SIN VENTAS ---")
+
+    for cat in sorted(categorias):
+
+        print("-", cat)

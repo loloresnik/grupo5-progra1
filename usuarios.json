@@ -1,0 +1,17 @@
+[
+    {
+        "usuario": "admin",
+        "clave": "1234",
+        "tipo": "admin"
+    },
+    {
+        "usuario": "usuario",
+        "clave": "1234",
+        "tipo": "usuario"
+    },
+    {
+        "usuario": "ivan",
+        "clave": "132912",
+        "tipo": "usuario"
+    }
+]

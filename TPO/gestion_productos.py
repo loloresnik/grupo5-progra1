@@ -1,6 +1,7 @@
 import re
 import json
 import proveedores
+import validaciones
 
 # Agregar producto
 def agregar_producto_dic(productos_dic, ids_unicos, proveedores_lista):
@@ -28,7 +29,7 @@ def agregar_producto_dic(productos_dic, ids_unicos, proveedores_lista):
 
     nombre = input("Ingrese el nombre del producto: ").strip()
 
-    while re.match(r"^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$", nombre) is None:
+    while re.match(r"^[A-Za-zÁÉÍÓÚáéíóúÑñÜü ]+$", nombre) is None:
 
         print("El nombre solo puede contener letras.")
 
@@ -36,7 +37,7 @@ def agregar_producto_dic(productos_dic, ids_unicos, proveedores_lista):
 
     categoria = input("Ingrese la categoría: ").strip()
 
-    while re.match(r"^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$", nombre) is None:
+    while re.match(r"^[A-Za-zÁÉÍÓÚáéíóúÑñÜü ]+$", categoria) is None:
 
         print("La categoría solo puede contener letras.")
 
@@ -85,6 +86,8 @@ def agregar_producto_dic(productos_dic, ids_unicos, proveedores_lista):
     productos_dic[id_prod] = nuevo
 
     ids_unicos.add(id_prod)
+
+    guardar_productos_json(productos_dic)
 
     print("Producto agregado correctamente.\n")
 
@@ -163,7 +166,7 @@ def eliminar_producto_dic(productos_dic, id_prod, ids_unicos):
 
     try:
 
-        del productos_dic[id_prod]
+        productos_dic.pop(id_prod)
 
     except KeyError:
 
@@ -226,7 +229,11 @@ def agregar_movimiento(movimientos, tipo, id_prod, cantidad, productos_dic):
 
         fecha = (dia, mes, anio)
 
-        movimientos.append([tipo, id_prod, cantidad, fecha])
+        movimiento = [tipo, id_prod, cantidad, fecha]
+
+        movimientos.append(movimiento)
+
+        agregar_movimiento_txt(movimiento)
 
         print("Movimiento registrado.")
 
@@ -292,6 +299,116 @@ def ingreso_stock_dic(productos_dic, id_prod, cantidad):
 
         return 0
 
+# Consultar producto
+def consultar_producto(productos_dic, proveedores_lista):
+    """Pide un ID y muestra los datos del producto con el nombre de su proveedor."""
+
+    print("\n=== CONSULTAR PRODUCTO ===")
+
+    id_prod = validaciones.pedir_entero("Ingrese ID del producto: ")
+
+    producto = buscar_producto_dic(productos_dic, id_prod)
+
+    if producto is None:
+
+        print("Producto no encontrado.")
+
+        return 0
+
+    nombre_prov = proveedores.nombre_proveedor(proveedores_lista, producto["id_proveedor"])
+
+    print(f"ID: {id_prod}")
+    print(f"Nombre: {producto['nombre']}")
+    print(f"Categoría: {producto['categoria']}")
+    print(f"Proveedor: {nombre_prov}")
+    print(f"Stock: {producto['stock']}")
+    print(f"Precio: ${producto['precio']}")
+
+    return 1
+
+# Modificar producto (pide los datos)
+def modificar_producto(productos_dic, proveedores_lista):
+    """Pide el ID y los datos nuevos. Si un campo se deja vacío, no se modifica."""
+
+    print("\n=== MODIFICAR PRODUCTO ===")
+
+    id_prod = validaciones.pedir_entero("Ingrese ID del producto a modificar: ")
+
+    if buscar_producto_dic(productos_dic, id_prod) is None:
+
+        print("Producto no encontrado.")
+
+        return 0
+
+    print("Deje vacío un campo si no desea modificarlo.")
+
+    nuevo_nombre = validaciones.pedir_texto("Nuevo nombre: ", True)
+
+    nueva_categoria = validaciones.pedir_texto("Nueva categoría: ", True)
+
+    nuevo_id_proveedor = validaciones.pedir_entero("Nuevo ID de proveedor: ", True)
+
+    nuevo_precio = validaciones.pedir_entero("Nuevo precio: ", True)
+
+    resultado = modificar_producto_dic(productos_dic, id_prod, nuevo_nombre, nueva_categoria, nuevo_id_proveedor, nuevo_precio, proveedores_lista)
+
+    if resultado == 1:
+
+        guardar_productos_json(productos_dic)
+
+    return resultado
+
+# Eliminar producto (pide el ID)
+def eliminar_producto(productos_dic, ids_unicos):
+    """Pide el ID del producto y lo elimina."""
+
+    print("\n=== ELIMINAR PRODUCTO ===")
+
+    id_prod = validaciones.pedir_entero("Ingrese ID del producto a eliminar: ")
+
+    resultado = eliminar_producto_dic(productos_dic, id_prod, ids_unicos)
+
+    if resultado == 1:
+
+        guardar_productos_json(productos_dic)
+
+    return resultado
+
+# Registrar ingreso de stock
+def registrar_ingreso(productos_dic, movimientos):
+    """Pide producto y cantidad. Primero registra el movimiento y,
+    solo si se pudo registrar, suma el stock."""
+
+    print("\n=== INGRESO DE STOCK ===")
+
+    id_prod = validaciones.pedir_entero("Ingrese ID del producto: ")
+
+    if buscar_producto_dic(productos_dic, id_prod) is None:
+
+        print("Producto no encontrado.")
+
+        return 0
+
+    cantidad = validaciones.pedir_entero("Ingrese cantidad: ")
+
+    if cantidad <= 0:
+
+        print("La cantidad debe ser mayor a 0.")
+
+        return 0
+
+    if agregar_movimiento(movimientos, "Ingreso", id_prod, cantidad, productos_dic) == 0:
+
+        return 0
+
+    resultado = ingreso_stock_dic(productos_dic, id_prod, cantidad)
+
+    if resultado == 1:
+
+        guardar_productos_json(productos_dic)
+
+    return resultado
+
 def guardar_productos_json(productos_dic):
     """Guarda el diccionario de productos en productos.json.
     JSON guarda las claves como texto: el ID 1 queda como "1"."""
@@ -341,40 +458,26 @@ def cargar_productos_json():
 
         return {}
 
-    except (OSError, ValueError, AttributeError) as error:
+    except (OSError, json.JSONDecodeError, ValueError, AttributeError) as error:
 
         print("Error al cargar productos:", error)
 
         return {}
 
-def guardar_movimientos_txt(movimientos):
+# Agregar movimiento al TXT
+def agregar_movimiento_txt(movimiento):
+    """Agrega una línea al final de movimientos.txt (modo append).
+    Formato: tipo;id_producto;cantidad;dia;mes;año"""
 
     try:
 
-        archivo = open(
-            "movimientos.txt",
-            "w",
-            encoding="utf-8"
-        )
+        archivo = open("movimientos.txt", "a", encoding="utf-8")
 
-        for movimiento in movimientos:
+        fecha = movimiento[3]
 
-            tipo = movimiento[0]
-            id_prod = movimiento[1]
-            cantidad = movimiento[2]
+        linea = f"{movimiento[0]};{movimiento[1]};{movimiento[2]};{fecha[0]};{fecha[1]};{fecha[2]}\n"
 
-            fecha = movimiento[3]
-
-            linea = "{};{};{};{};{};{}\n".format(
-                tipo,
-                id_prod,
-                cantidad,
-                fecha[0],
-                fecha[1],
-                fecha[2]
-            )
-
-            archivo.write(linea)
+        archivo.write(linea)
 
         archivo.close()
 
@@ -382,7 +485,7 @@ def guardar_movimientos_txt(movimientos):
 
     except OSError as error:
 
-        print("Error al guardar movimientos:", error)
+        print("Error al guardar el movimiento:", error)
 
         return 0
 
