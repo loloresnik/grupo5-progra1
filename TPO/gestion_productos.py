@@ -1,10 +1,12 @@
 import re
 import json
+import proveedores
 
 # Agregar producto
-def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedores_unicos):
-    """Registra un nuevo producto en la lista de diccionarios.
-    Valida cada campo ingresado por el usuario y evita que se repitan IDs utilizando un conjunto."""
+def agregar_producto_dic(productos_dic, ids_unicos, proveedores_lista):
+    """Registra un nuevo producto en el diccionario de productos (clave = ID del producto).
+    Valida cada campo ingresado por el usuario, evita que se repitan IDs
+    y verifica que el proveedor exista en la lista de proveedores."""
 
     print("\n=== AGREGAR PRODUCTO ===")
 
@@ -18,7 +20,7 @@ def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedor
 
     id_prod = int(id_prod)
 
-    if id_prod in ids_unicos:
+    if id_prod in productos_dic:
 
         print("El ID ya existe.")
 
@@ -40,13 +42,21 @@ def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedor
 
         categoria = input("Ingrese la categoría: ").strip()
 
-    proveedor = input("Ingrese el proveedor: ").strip()
+    id_proveedor = input("Ingrese el ID del proveedor: ").strip()
 
-    while re.match(r"^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$", proveedor) is None:
+    while re.match(r"^\d+$", id_proveedor) is None:
 
-        print("El proveedor solo puede contener letras.")
+        print("El ID del proveedor debe ser numérico.")
 
-        proveedor = input("Ingrese el proveedor: ").strip()
+        id_proveedor = input("Ingrese el ID del proveedor: ").strip()
+
+    id_proveedor = int(id_proveedor)
+
+    if proveedores.buscar_proveedor_por_id(proveedores_lista, id_proveedor) is None:
+
+        print("No existe un proveedor con ese ID. Registre primero el proveedor.")
+
+        return 0
 
     stock = input("Ingrese el stock inicial: ").strip()
 
@@ -65,19 +75,16 @@ def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedor
         precio = input("Ingrese el precio del producto: ").strip()
 
     nuevo = {
-        "id": id_prod,
         "nombre": nombre,
         "categoria": categoria,
-        "proveedor": proveedor,
+        "id_proveedor": id_proveedor,
         "stock": int(stock),
         "precio": int(precio)
     }
 
-    productos_dic.append(nuevo)
+    productos_dic[id_prod] = nuevo
 
     ids_unicos.add(id_prod)
-    categorias_unicas.add(categoria)
-    proveedores_unicos.add(proveedor)
 
     print("Producto agregado correctamente.\n")
 
@@ -85,20 +92,15 @@ def agregar_producto_dic(productos_dic, ids_unicos, categorias_unicas, proveedor
 
 # Buscar producto 
 def buscar_producto_dic(productos_dic, id_prod):
-    """Recorre la lista y devuelve el diccionario del producto si encuentra coincidencia.
+    """Devuelve el diccionario del producto con ese ID.
     Si no existe, devuelve None."""
 
-    for p in productos_dic:
-
-        if p["id"] == id_prod:
-
-            return p
-
-    return None
+    return productos_dic.get(id_prod)
 
 # Mostrar productos 
-def mostrar_productos_dic(productos_dic):
-    """Muestra todos los productos almacenados en formato de tabla."""
+def mostrar_productos_dic(productos_dic, proveedores_lista):
+    """Muestra todos los productos almacenados en formato de tabla,
+    con el nombre del proveedor obtenido a partir de su ID."""
 
     if len(productos_dic) == 0:
 
@@ -111,81 +113,69 @@ def mostrar_productos_dic(productos_dic):
     print("ID             Nombre          Categoria       Proveedor       Stock     Precio")
     print("-" * 100)
 
-    for p in productos_dic:
+    for id_prod, p in productos_dic.items():
 
-        print(f"{p['id']:<15} {p['nombre']:<15} {p['categoria']:<15} {p['proveedor']:<15} {p['stock']:<10} ${p['precio']}")
+        nombre_prov = proveedores.nombre_proveedor(proveedores_lista, p["id_proveedor"])
+
+        print(f"{id_prod:<15} {p['nombre']:<15} {p['categoria']:<15} {nombre_prov:<15} {p['stock']:<10} ${p['precio']}")
 
     print("-" * 100)
 
 # Modificar producto 
-def modificar_producto_dic(productos_dic, id_prod, nuevo_nombre, nueva_categoria, nuevo_proveedor, nuevo_precio, categorias_unicas, proveedores_unicos):
+def modificar_producto_dic(productos_dic, id_prod, nuevo_nombre, nueva_categoria, nuevo_id_proveedor, nuevo_precio, proveedores_lista):
 
-    try:
+    producto = buscar_producto_dic(productos_dic, id_prod)
 
-        producto = buscar_producto_dic(productos_dic, id_prod)
+    if producto is None:
 
-        if producto is None:
-
-            print("Producto no encontrado.")
-
-            return 0
-
-        if nuevo_nombre is not None:
-
-            producto["nombre"] = nuevo_nombre
-
-        if nueva_categoria is not None:
-
-            producto["categoria"] = nueva_categoria
-
-            categorias_unicas.add(nueva_categoria)
-
-        if nuevo_proveedor is not None:
-
-            producto["proveedor"] = nuevo_proveedor
-
-            proveedores_unicos.add(nuevo_proveedor)
-
-        if nuevo_precio is not None:
-
-            producto["precio"] = nuevo_precio
-
-        print("Producto modificado correctamente.")
-
-        return 1
-
-    except Exception as error:
-
-        print("Error:", error)
+        print("Producto no encontrado.")
 
         return 0
+
+    if nuevo_id_proveedor is not None and proveedores.buscar_proveedor_por_id(proveedores_lista, nuevo_id_proveedor) is None:
+
+        print("No existe un proveedor con ese ID.")
+
+        return 0
+
+    if nuevo_nombre is not None:
+
+        producto["nombre"] = nuevo_nombre
+
+    if nueva_categoria is not None:
+
+        producto["categoria"] = nueva_categoria
+
+    if nuevo_id_proveedor is not None:
+
+        producto["id_proveedor"] = nuevo_id_proveedor
+
+    if nuevo_precio is not None:
+
+        producto["precio"] = nuevo_precio
+
+    print("Producto modificado correctamente.")
+
+    return 1
 
 # Eliminar producto
 def eliminar_producto_dic(productos_dic, id_prod, ids_unicos):
 
     try:
 
-        for i in range(len(productos_dic)):
+        del productos_dic[id_prod]
 
-            if productos_dic[i]["id"] == id_prod:
-
-                productos_dic.pop(i)
-
-                ids_unicos.remove(id_prod)
-
-                print("Producto eliminado.")
-
-                return 1
+    except KeyError:
 
         print("Producto no encontrado.")
 
         return 0
 
-    except Exception as error:
+    ids_unicos.discard(id_prod)
 
-        print("Error:", error)
+    print("Producto eliminado.")
 
-        return 0
+    return 1
 
 # Registrar movimiento
 def agregar_movimiento(movimientos, tipo, id_prod, cantidad, productos_dic):
@@ -242,9 +232,9 @@ def agregar_movimiento(movimientos, tipo, id_prod, cantidad, productos_dic):
 
         return 1
 
-    except Exception as error:
+    except ValueError as error:
 
-        print("Error:", error)
+        print("Fecha inválida:", error)
 
         return 0
 
@@ -296,13 +286,15 @@ def ingreso_stock_dic(productos_dic, id_prod, cantidad):
 
         return 1
 
-    except Exception as error:
+    except (KeyError, TypeError) as error:
 
-        print("Error:", error)
+        print("Error en los datos del producto:", error)
 
         return 0
 
 def guardar_productos_json(productos_dic):
+    """Guarda el diccionario de productos en productos.json.
+    JSON guarda las claves como texto: el ID 1 queda como "1"."""
 
     try:
 
@@ -319,7 +311,7 @@ def guardar_productos_json(productos_dic):
 
         return 1
 
-    except Exception as error:
+    except (OSError, TypeError) as error:
 
         print("Error al guardar productos:", error)
 
@@ -327,26 +319,33 @@ def guardar_productos_json(productos_dic):
 
 
 def cargar_productos_json():
+    """Carga productos.json y vuelve a convertir las claves (IDs) de texto a número."""
 
     try:
 
         archivo = open("productos.json", "r", encoding="utf-8")
 
-        productos_dic = json.load(archivo)
+        datos = json.load(archivo)
 
         archivo.close()
+
+        productos_dic = {}
+
+        for id_prod, producto in datos.items():
+
+            productos_dic[int(id_prod)] = producto
 
         return productos_dic
 
     except FileNotFoundError:
 
-        return []
+        return {}
 
-    except Exception as error:
+    except (OSError, ValueError, AttributeError) as error:
 
         print("Error al cargar productos:", error)
 
-        return []
+        return {}
 
 def guardar_movimientos_txt(movimientos):
 
@@ -381,11 +380,13 @@ def guardar_movimientos_txt(movimientos):
 
         return 1
 
-    except Exception as error:
+    except OSError as error:
 
         print("Error al guardar movimientos:", error)
 
         return 0
+
+def cargar_movimientos_txt():
 
     movimientos = []
 
@@ -422,9 +423,8 @@ def guardar_movimientos_txt(movimientos):
 
         return []
 
-    except Exception as error:
+    except (OSError, ValueError, IndexError) as error:
 
         print("Error al cargar movimientos:", error)
 
         return []
-
