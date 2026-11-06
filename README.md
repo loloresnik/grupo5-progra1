@@ -84,19 +84,33 @@ Cambios respecto de la primera entrega
 A partir de la devolución de la primera entrega se realizaron las siguientes mejoras:
 
 Los productos y los proveedores se relacionan por ID.
+
 Los patrones de las expresiones regulares aceptan tildes, ñ y ü.
+
 Las búsquedas por proveedor ya no usan el texto ingresado como patrón de expresión regular.
+
 Se agregaron operaciones entre conjuntos: proveedores sin productos, categorías sin ventas y productos vendidos que se quedaron sin stock.
+
 Se agregaron conteos y promedios por categoría y por proveedor, y un resumen estadístico.
+
 Se limitó el inicio de sesión a 3 intentos y se agregó una opción para salir del programa.
+
 Se eliminó main_prueba.py y los imports con asterisco.
+
 El menú quedó separado de la lógica del programa.
+
 Se agregó el guardado de datos en archivos TXT y JSON.
+
 Integrantes
+
 Integrante	Legajo
+
 Iván Ricardo Martínez Sccasso	1223079
+
 Lorenzo Resnik	1215403
+
 Franco Schwab	1238148
+
 Damián Siles	1238437
 
 Scrum Master: Lorenzo Resnik
@@ -107,9 +121,13 @@ Repositorio: https://github.com/loloresnik/grupo5-progra1
 Primera entrega
 
 Video de presentación: https://youtu.be/ZnmKXiAl1yw
+
 Video de funcionamiento: https://youtu.be/UmUBWy5wKCc
+
 Segunda entrega
+
 Video: 
+
 Objetivo
 
 Aplicar los contenidos de Programación 1 mediante el desarrollo de un sistema modular para gestionar el inventario de un local de computación de forma organizada, incorporando validaciones, estructuras de datos, archivos, recursividad, diferentes niveles de acceso y reportes.
