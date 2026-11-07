@@ -48,5 +48,10 @@
         "usuario": "ventas",
         "clave": "ventas1",
         "tipo": "usuario"
+    },
+    {
+        "usuario": "ivancheti",
+        "clave": "132912",
+        "tipo": "usuario"
     }
 ]
